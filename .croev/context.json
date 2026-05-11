@@ -1,0 +1,77 @@
+{
+  "brand": {
+    "id": "ad78179a-0fbf-4c00-80ab-3b9ad15d8b2d",
+    "slug": "fundsmart-ai",
+    "name": "Fundsmart AI",
+    "url": "fundsmart.ai",
+    "primaryLandingPage": "https://app.fundsmart.ai/landinggov",
+    "status": "ACTIVE",
+    "serviceType": "CONVERSION_BRIDGE",
+    "isShopify": false,
+    "company": {
+      "name": "Atlas Innovations LLC",
+      "ein": "453074916",
+      "address": "2801 E Main St, Endicott, NY 13760"
+    },
+    "contact": {
+      "email": "max@atlasmarketing.pro",
+      "phone": "+16076448127"
+    },
+    "leadSource": "Referral",
+    "slackChannelId": "C0ASR1C12DT",
+    "createdAt": "2026-02-13T13:07:32.197Z"
+  },
+  "currentWork": {
+    "landingPages": [
+      {
+        "id": "aea6d951-de3a-4bb1-9afe-021999c55c90",
+        "shortCode": "SAL-001",
+        "name": "Sales LP",
+        "type": "SALES",
+        "status": "BRIEF",
+        "deadline": "2026-05-10T22:00:00.000Z",
+        "googleDocUrl": "https://docs.google.com/document/d/17gqnYqiSHPs3jdOeoFx8Nw9AFr1A46ppTIw8MLJyg-E/edit",
+        "variants": [{"name": "V1", "id": "d4b74302-7985-4d68-9d7e-ec46c6bfa1be"}]
+      },
+      {
+        "id": "0501ee20-072c-4127-b04b-3884a9f866e1",
+        "shortCode": "QUZ-001",
+        "name": "Quiz",
+        "type": "QUIZ",
+        "status": "BRIEF",
+        "deadline": "2026-05-10T22:00:00.000Z",
+        "googleDocUrl": "https://docs.google.com/document/d/1XRtzdRVZo01RNMIU_vonRLqE_TKH-0l0HyU7EgheBIE/edit",
+        "variants": [{"name": "V1", "id": "d049e0e9-a79f-4c60-b1b4-a2b0e69b7331"}]
+      },
+      {
+        "id": "d55d26ea-0c80-4892-833c-922eef6cfe0f",
+        "shortCode": "ADV-001",
+        "name": "Advertorial",
+        "type": "ADVERTORIAL",
+        "status": "BRIEF",
+        "deadline": "2026-05-10T22:00:00.000Z",
+        "googleDocUrl": "https://docs.google.com/document/d/19BAe99nEAAlWUDEyylA3wIABKPM2FSFnjaAbKXzdKZE/edit",
+        "variants": [{"name": "V1", "id": "37d62435-f472-496c-8c46-6fcab6ad6d74"}]
+      }
+    ],
+    "splitTests": [],
+    "generalTasks": []
+  },
+  "assets": [
+    {
+      "name": "All assets in a Gdrive Folder",
+      "format": "LINK",
+      "url": "https://drive.google.com/drive/folders/1FnKC4nt81hYMIn7k8l-_4NEvzc35tnZD?usp=drive_link",
+      "accessGranted": false
+    }
+  ],
+  "counts": {
+    "splitTests": 0,
+    "landingPages": 3,
+    "brandAssets": 1,
+    "angles": 0,
+    "products": 0,
+    "insights": 0,
+    "calls": 1
+  }
+}
