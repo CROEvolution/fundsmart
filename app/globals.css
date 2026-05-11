@@ -1,26 +1,158 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Brand palette — pulled directly from app.fundsmart.ai/landinggov.
+     Dark navy primary, vibrant emerald accent, mint icon tiles,
+     light-slate section backgrounds. */
+
+  --color-navy: #0d2540;
+  --color-navy-deep: #07172b;
+  --color-navy-soft: #1a3756;
+  --color-navy-line: #1f3e60;
+
+  --color-green: #22c55e;
+  --color-green-dark: #16a34a;
+  --color-green-deep: #0f7a3b;
+  --color-mint: #d1fae5;
+  --color-mint-soft: #ecfdf5;
+
+  --color-ink: #0d2540;
+  --color-ink-soft: #475569;
+  --color-stone: #64748b;
+  --color-line: #e2e8f0;
+  --color-line-soft: #eef2f7;
+  --color-page: #f6f8fa;
+  --color-card: #ffffff;
+
+  --color-warning: #b54708;
+
   --font-sans: var(--font-geist-sans);
+  --font-serif: var(--font-instrument-serif);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --background: #ffffff;
+  --foreground: #0d2540;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Serif italic accent used in section headings (matches /landinggov "Why It Works"). */
+.serif-italic {
+  font-family: var(--font-serif), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* ---------- Buttons ---------- */
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-green)] px-6 py-3.5 text-[15px] font-bold text-white transition;
+  @apply hover:bg-[var(--color-green-dark)] hover:shadow-[0_8px_24px_rgba(34,197,94,0.32)];
+  @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-green)] focus-visible:ring-offset-2;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed;
+}
+.btn-primary-dark {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-navy)] px-6 py-3.5 text-[15px] font-bold text-white transition;
+  @apply hover:bg-[var(--color-navy-soft)] hover:shadow-[0_8px_24px_rgba(13,37,64,0.24)];
+  @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-green)] focus-visible:ring-offset-2;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed;
+}
+.btn-nav {
+  @apply inline-flex items-center gap-1.5 rounded-full bg-[var(--color-green)] px-5 py-2 text-[13.5px] font-bold text-white transition hover:bg-[var(--color-green-dark)];
+}
+.btn-ghost {
+  @apply inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-stone)] underline-offset-4 hover:text-[var(--color-ink)] hover:underline cursor-pointer;
+}
+.btn-ghost-dark {
+  @apply inline-flex items-center gap-1.5 text-sm font-medium text-white/70 underline-offset-4 hover:text-white hover:underline cursor-pointer;
+}
+
+/* ---------- Chips ---------- */
+/* Amount/option chip. Rounded-rectangle (not full pill) to match /landinggov. */
+.chip {
+  @apply inline-flex items-center justify-center rounded-xl border border-[var(--color-line)] bg-[var(--color-line-soft)] px-4 py-3 text-[15px] font-bold text-[var(--color-ink)] transition;
+  @apply hover:border-[var(--color-green)] hover:bg-white;
+  @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-green)];
+  @apply cursor-pointer select-none;
+}
+.chip[data-selected="true"] {
+  @apply border-[var(--color-green)] bg-[var(--color-mint-soft)] text-[var(--color-ink)] ring-2 ring-[var(--color-green)]/30;
+}
+.chip-sm {
+  @apply rounded-lg px-3.5 py-2 text-[13.5px] font-semibold;
+}
+
+/* Dark pill (used on navy hero for "No Credit Impact" etc trust strip). */
+.pill-dark {
+  @apply inline-flex items-center gap-2 rounded-full bg-[var(--color-navy-soft)] px-4 py-2 text-[13px] font-semibold text-white border border-[var(--color-navy-line)];
+}
+.pill-dark .pill-dot {
+  @apply w-2 h-2 rounded-full bg-[var(--color-green)];
+}
+
+/* ---------- Cards ---------- */
+.card {
+  @apply rounded-2xl bg-[var(--color-card)] border border-[var(--color-line)];
+}
+.card-hero {
+  @apply rounded-3xl bg-white border border-[var(--color-line)] shadow-[0_20px_60px_rgba(7,23,43,0.32)];
+}
+.card-step {
+  @apply relative rounded-2xl bg-white border border-[var(--color-line)] overflow-hidden;
+}
+.card-step::before {
+  content: "";
+  @apply absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[var(--color-green)] via-[var(--color-mint)] to-transparent;
+}
+.icon-tile {
+  @apply inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[var(--color-mint)] text-[var(--color-green-deep)];
+}
+
+/* ---------- Trust microstrip on dark BG ---------- */
+.trust-row-dark {
+  @apply flex items-center gap-2 text-[14px] text-white/85;
+}
+.trust-row-light {
+  @apply flex items-center gap-2 text-[14px] text-[var(--color-ink-soft)];
+}
+
+/* ---------- Backgrounds ---------- */
+.bg-hero-navy {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 30%, rgba(34, 197, 94, 0.18) 0%, rgba(34, 197, 94, 0) 60%),
+    radial-gradient(ellipse 60% 40% at 30% 70%, rgba(34, 197, 94, 0.10) 0%, transparent 70%),
+    linear-gradient(180deg, var(--color-navy) 0%, var(--color-navy-deep) 100%);
+}
+
+/* ---------- Animations ---------- */
+@keyframes brand-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.brand-pulse {
+  animation: brand-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in {
+  animation: fade-in 220ms ease-out;
+}
+
+/* Top progress bar gradient (matches /landinggov form). */
+.progress-grad {
+  background: linear-gradient(90deg, var(--color-green) 0%, #4ade80 50%, var(--color-green-dark) 100%);
 }
