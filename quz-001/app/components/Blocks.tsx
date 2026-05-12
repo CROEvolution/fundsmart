@@ -1,9 +1,21 @@
 "use client";
 
 // Below-the-fold trust blocks: Stats, HowItWorks, LenderCompetition,
-// CaseStudies, WhyOneLender, FAQ. Ported 1:1 from the design bundle.
+// CaseStudies, WhyOneLender, FAQ. All section shells use the same
+// `.container` (1180px) for grid sections; text-heavy sections (FAQ,
+// FinalCTA) use `.container.narrow`. This keeps the page width
+// consistent on desktop.
 
 import Icon from "./ui/Icon";
+
+const LENDERS = [
+  { name: "Iwoca", src: "/lender-logos/iwoca.webp" },
+  { name: "Funding Circle", src: "/lender-logos/funding-circle.webp" },
+  { name: "Halo", src: "/lender-logos/halo.webp" },
+  { name: "Funding Options by Tide", src: "/lender-logos/funding-options-by-tide.webp" },
+  { name: "Bizcap", src: "/lender-logos/bizcap.webp" },
+  { name: "Lending Box", src: "/lender-logos/lending-box.webp" },
+];
 
 export function Stats() {
   const items = [
@@ -61,8 +73,8 @@ export function HowItWorks() {
   ];
   return (
     <section className="section" data-screen-label="Trust · How it works">
-      <div className="container narrow">
-        <div className="stack gap-3 mb-8">
+      <div className="container">
+        <div className="stack gap-3 mb-8" style={{ maxWidth: 720 }}>
           <span className="eyebrow">How it actually works</span>
           <h2>Three steps. One matched lender. Zero broker spam.</h2>
         </div>
@@ -106,20 +118,8 @@ export function HowItWorks() {
 }
 
 export function LenderCompetition() {
-  const lenders = [
-    "Iwoca",
-    "Funding Circle",
-    "Halo",
-    "Funding Options · Tide",
-    "Bizcap",
-    "Lending Box",
-    "Capify",
-    "Nucleus",
-    "MarketFinance",
-    "YouLend",
-    "Capitalflow",
-    "Just Cashflow",
-  ];
+  // Two duplicated tracks scroll-left infinitely (matches the live site's
+  // marquee). Grayscale + opacity by default; full colour on hover.
   return (
     <section
       className="section tight"
@@ -138,30 +138,13 @@ export function LenderCompetition() {
           </h2>
           <p className="muted small">We do the filtering. You don&apos;t get a dozen calls.</p>
         </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-            gap: 4,
-            marginTop: 12,
-          }}
-        >
-          {lenders.map((l, i) => (
-            <div
-              key={i}
-              style={{
-                padding: "18px 12px",
-                border: "1px solid var(--border)",
-                borderRadius: 10,
-                textAlign: "center",
-                background: "var(--bg)",
-                fontWeight: 700,
-                color: "var(--muted)",
-                fontSize: 14,
-                letterSpacing: "-.01em",
-              }}
-            >
-              {l}
+      </div>
+      <div className="marquee mt-6">
+        <div className="marquee-track" aria-hidden="true">
+          {[...LENDERS, ...LENDERS].map((l, i) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <div className="lender-cell" key={`${l.name}-${i}`}>
+              <img src={l.src} alt={l.name} loading="lazy" />
             </div>
           ))}
         </div>
@@ -203,9 +186,9 @@ export function CaseStudies() {
   return (
     <section className="section" data-screen-label="Trust · Case studies">
       <div className="container">
-        <div className="stack gap-3 mb-6">
+        <div className="stack gap-3 mb-6" style={{ maxWidth: 720 }}>
           <span className="eyebrow">Funded last quarter</span>
-          <h2 style={{ maxWidth: 720 }}>Operators who stopped guessing and got matched.</h2>
+          <h2>Operators who stopped guessing and got matched.</h2>
         </div>
         <div className="steps3">
           {cases.map((c, i) => (
@@ -267,14 +250,12 @@ export function WhyOneLender() {
       }}
       data-screen-label="Trust · Why one lender"
     >
-      <div className="container narrow">
-        <div className="stack gap-3 mb-8">
+      <div className="container">
+        <div className="stack gap-3 mb-8" style={{ maxWidth: 720 }}>
           <span className="eyebrow" style={{ color: "#93C5FD" }}>
             Proprietary mechanism
           </span>
-          <h2 style={{ color: "#fff", maxWidth: 720 }}>
-            Why we match you to one lender, not twelve.
-          </h2>
+          <h2 style={{ color: "#fff" }}>Why we match you to one lender, not twelve.</h2>
         </div>
         <div className="stack gap-4">
           {points.map((p, i) => (
