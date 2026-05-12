@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Chip, Icon } from "./ui";
 import {
   type AddressSuggestion,
@@ -45,28 +46,34 @@ export function ContinueBtn({
   onClick: () => void;
   label?: string;
 }) {
+  const [mobile, setMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+    const mq = window.matchMedia("(max-width: 600px)");
+    const update = () => setMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  const btn = (
+    <button className="btn primary lg" disabled={disabled} onClick={onClick}>
+      {label}
+      <Icon name="ArrowRight" size="sm" />
+    </button>
+  );
+
+  if (mounted && mobile) {
+    return createPortal(
+      <div className="continue-row-portal">{btn}</div>,
+      document.body,
+    );
+  }
+
   return (
-    <div className="mt-6 row between" style={{ flexWrap: "wrap", gap: 12 }}>
-      <span className="tiny muted">
-        Press{" "}
-        <kbd
-          style={{
-            background: "var(--bg)",
-            border: "1px solid var(--border)",
-            padding: "2px 6px",
-            borderRadius: 6,
-            fontFamily: "inherit",
-            fontSize: 11,
-          }}
-        >
-          Enter
-        </kbd>{" "}
-        to continue
-      </span>
-      <button className="btn primary lg" disabled={disabled} onClick={onClick}>
-        {label}
-        <Icon name="ArrowRight" size="sm" />
-      </button>
+    <div className="mt-6 row" style={{ justifyContent: "flex-end", flexWrap: "wrap", gap: 12 }}>
+      {btn}
     </div>
   );
 }
@@ -338,7 +345,7 @@ export function StepDob({
       <StepHeader
         label="Quick identity check."
         sub={`Companies House shows ${director.name} as born ${formatMonthYear(director)}. Confirm the day to verify it's you.`}
-        micro="We only ever store the day during this session — never linked back to your file."
+        micro="We only ever store the day during this session, never linked back to your file."
       />
       <div className="dob-row">
         <div className="dob-cell readonly">
@@ -526,7 +533,7 @@ export function StepContact({
   return (
     <>
       <StepHeader
-        label="Last step — where do we send your match?"
+        label="Last step: where do we send your match?"
         sub="Quick personal details. Your specialist rings in as little as 1 hour during working hours with your matched lender's indicative offer."
       />
 

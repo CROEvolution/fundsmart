@@ -2,7 +2,7 @@
 
 import Icon from "./Icon";
 
-// The 3-item trust microbar that lives just under the modal head.
+// The 2-item trust microbar that lives just under the modal head.
 export default function ModalTrust() {
   return (
     <div className="modal-trust">
@@ -11,9 +11,6 @@ export default function ModalTrust() {
       </span>
       <span>
         <Icon name="Search" size="sm" /> Soft search only
-      </span>
-      <span>
-        <Icon name="Lock" size="sm" /> Your data is never sold
       </span>
     </div>
   );

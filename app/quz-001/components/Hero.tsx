@@ -38,11 +38,11 @@ export default function Hero({ amount, setAmount, onContinue, cardRef }: Props) 
             </h1>
             <p className="hero-sub on-dark">
               <strong>40% of UK SME loan applications get rejected.</strong> One soft search, one
-              matched lender, one decision &mdash; funded in as soon as 4 hours.
+              matched lender, one decision, funded in as soon as 4 hours.
             </p>
           </div>
 
-          {/* FORM CARD — right column on desktop, second on mobile */}
+          {/* FORM CARD: right column on desktop, second on mobile */}
           <div
             ref={cardRef}
             className="card hero-card"
@@ -67,9 +67,6 @@ export default function Hero({ amount, setAmount, onContinue, cardRef }: Props) 
             <div className="stack gap-5 hero-card-body">
               <div className="stack gap-3">
                 <label className="label">How much funding do you need?</label>
-                <p className="tiny muted" style={{ marginTop: -4 }}>
-                  Soft credit search only. No impact on your score. Your details aren&apos;t sold on.
-                </p>
                 <div className="grid-6">
                   {AMOUNTS.map((a) => (
                     <PriceChip key={a} active={amount === a} onClick={() => setAmount(a)}>
@@ -105,12 +102,15 @@ export default function Hero({ amount, setAmount, onContinue, cardRef }: Props) 
               </button>
 
               <div
-                className="row gap-4"
+                className="row"
                 style={{
-                  flexWrap: "wrap",
-                  justifyContent: "center",
+                  flexWrap: "nowrap",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 8,
                   color: "var(--muted)",
                   fontSize: 12,
+                  whiteSpace: "nowrap",
                 }}
               >
                 <span className="row gap-2">

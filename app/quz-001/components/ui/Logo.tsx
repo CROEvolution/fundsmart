@@ -1,4 +1,4 @@
-// Fundsmart wordmark — uses the official brand image from /public.
+// Fundsmart wordmark: uses the official brand image from /public.
 // The source asset is dark (navy text + green chart), so on dark
 // backgrounds we apply `filter: invert(1)` via the `.logo-img.light`
 // class. Pass variant="dark" to render the source colors unchanged
