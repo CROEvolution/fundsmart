@@ -61,7 +61,7 @@ export function HowItWorks() {
     {
       n: "2",
       title: "Get matched to one lender.",
-      body: "Our AI cross-references your business against 100+ FCA-regulated lenders and picks the one most likely to approve. Not the one paying us the most.",
+      body: "Our AI cross-references you against 100+ FCA-regulated lenders and picks the single one most likely to approve. Not the one paying us the highest commission.",
       ico: "GitBranch",
     },
     {
@@ -76,7 +76,7 @@ export function HowItWorks() {
       <div className="container">
         <div className="stack gap-3 mb-8" style={{ maxWidth: 720 }}>
           <span className="eyebrow">How it actually works</span>
-          <h2>Three steps. One matched lender. Zero broker spam.</h2>
+          <h2>Three steps. One matched lender. Nobody else gets your file.</h2>
         </div>
         <div className="steps3">
           {steps.map((s, i) => (
@@ -136,7 +136,7 @@ export function LenderCompetition() {
           <h2 style={{ fontSize: 24 }}>
             100+ FCA-regulated lenders compete. You only ever talk to one.
           </h2>
-          <p className="muted small">We do the filtering. You don&apos;t get a dozen calls.</p>
+          <p className="muted small">We do the filtering across the panel. You don&apos;t get a dozen calls.</p>
         </div>
       </div>
       <div className="marquee mt-6">
@@ -161,7 +161,7 @@ export function CaseStudies() {
       sum: "£50k line of credit",
       time: "Funded in 24 hours",
       quote:
-        "Tried Barclays first. Two weeks to tell me no. Then a comparison site — three brokers submitted my details without asking and tanked my credit file. Fundsmart matched me to one lender. One call. One decision. Money in 24 hours. Turnover's up 60% since.",
+        "Tried Barclays first. Two weeks to tell me no. Then a comparison site. Three brokers submitted my details without asking and tanked my credit file. Fundsmart matched me to one lender. One call. One decision. Money in 24 hours. Turnover's up 60% since.",
       bg: "#E9FBF1",
     },
     {
@@ -170,7 +170,7 @@ export function CaseStudies() {
       sum: "£75k",
       time: "Funded next day",
       quote:
-        "Bank rejected the application despite a clean trading history and a full order book. Fundsmart's AI matched me to a single specialist lender. One soft search. Funded the next day.",
+        "Bank said no even though my books were clean and the order book was full. Fundsmart's AI sent my file to one specialist. One soft search. Funded the next day.",
       bg: "#ECFDF5",
     },
     {
@@ -179,7 +179,7 @@ export function CaseStudies() {
       sum: "£150k",
       time: "Funded in 48 hours",
       quote:
-        "Needed stock funding for peak season. Wanted offers without a dozen brokers calling. One application, one matched lender, one soft search, funded inside 48 hours.",
+        "Needed stock funding for peak season. Wanted offers without a dozen brokers ringing. One application, one matched lender, one soft search, funded inside 48 hours.",
       bg: "#FEF3F2",
     },
   ];
@@ -188,7 +188,7 @@ export function CaseStudies() {
       <div className="container">
         <div className="stack gap-3 mb-6" style={{ maxWidth: 720 }}>
           <span className="eyebrow">Funded last quarter</span>
-          <h2>Operators who stopped guessing and got matched.</h2>
+          <h2>Operators the bank turned down. Funded by us inside 48 hours.</h2>
         </div>
         <div className="steps3">
           {cases.map((c, i) => (
@@ -213,7 +213,7 @@ export function CaseStudies() {
               </div>
               <blockquote>&ldquo;{c.quote}&rdquo;</blockquote>
               <div className="funded">
-                <Icon name="CheckCircle2" size="sm" /> {c.time}
+                <Icon name="CircleCheckBig" size="sm" /> {c.time}
               </div>
             </article>
           ))}
@@ -226,9 +226,9 @@ export function CaseStudies() {
 export function WhyOneLender() {
   const points: { ico: Parameters<typeof Icon>[0]["name"]; title: string; body: string }[] = [
     {
-      ico: "AlertTriangle",
+      ico: "TriangleAlert",
       title: "Twelve applications mean twelve hard credit pulls.",
-      body: "Comparison sites and broker farms submit your data across their panel. Every submission risks a hard search. Stack five of those in a week and lenders see a credit file in distress.",
+      body: "Comparison sites and broker farms fire your data across their panel. Every submission risks a hard search. Stack five in a week and lenders see a credit file in distress.",
     },
     {
       ico: "PhoneOff",
@@ -236,9 +236,9 @@ export function WhyOneLender() {
       body: "Brokers buy and resell lead data. Once you're in, you're spammed for weeks by people who've never seen your business.",
     },
     {
-      ico: "CheckCircle2",
+      ico: "CircleCheckBig",
       title: "One matched lender means one decision, one soft search, one specialist.",
-      body: "Our AI cross-references your business across 100+ lenders and picks the one whose underwriting box you actually fit. If they pass, your concierge finds you a second match. Your file stays clean either way.",
+      body: "Our AI cross-references your business across 100+ lenders and approaches the one whose underwriting box you actually fit. If they pass, your concierge finds a second match. Your file stays clean either way.",
     },
   ];
   return (

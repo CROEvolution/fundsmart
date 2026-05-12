@@ -1,14 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Chip, Icon } from "./ui";
 import {
-  COMPANY_FIXTURES,
+  type AddressSuggestion,
   type Company,
-  type Q3,
-  type Q4,
-  type Q5,
-  type Q6,
+  type Director,
+  type Purpose,
+  type Residency,
+  fmtGBP,
+  formatAddress,
+  formatMonthYear,
+  qualifyMax,
+  searchAddresses,
   searchCompanies,
 } from "@/lib/state";
 
@@ -25,9 +29,7 @@ export function StepHeader({
 }) {
   return (
     <div className="stack gap-2 mb-6">
-      {label && (
-        <h2 style={{ fontSize: 26, lineHeight: 1.2 }}>{label}</h2>
-      )}
+      {label && <h2 style={{ fontSize: 26, lineHeight: 1.2 }}>{label}</h2>}
       {sub && <p className="muted" style={{ fontSize: 15 }}>{sub}</p>}
       {micro && <p className="small muted-2 mt-2">{micro}</p>}
     </div>
@@ -69,52 +71,41 @@ export function ContinueBtn({
   );
 }
 
-// ---------- Q3 Purpose ----------
+// ---------- Step: Purpose ----------
 
-const Q3_OPTS: { v: Q3; l: string; ico: Parameters<typeof Icon>[0]["name"] }[] = [
+const PURPOSE_OPTS: { v: Purpose; l: string; ico: Parameters<typeof Icon>[0]["name"] }[] = [
   { v: "growth", l: "Growth or expansion", ico: "TrendingUp" },
   { v: "working", l: "Working capital or cashflow", ico: "Wallet" },
   { v: "vat", l: "VAT or HMRC bill", ico: "Receipt" },
   { v: "equip", l: "Equipment or vehicles", ico: "Truck" },
   { v: "bridge", l: "Bridging a contract", ico: "Link" },
   { v: "refi", l: "Refinancing existing debt", ico: "RefreshCw" },
-  { v: "other", l: "Other", ico: "MoreHorizontal" },
+  { v: "other", l: "Other", ico: "Ellipsis" },
 ];
 
-export function Q3Purpose({
+export function StepPurpose({
   value,
   onChange,
   onNext,
 }: {
-  value: Q3 | null;
-  onChange: (v: Q3) => void;
+  value: Purpose | null;
+  onChange: (v: Purpose) => void;
   onNext: () => void;
 }) {
   return (
     <>
       <StepHeader
         label="What's the funding for?"
-        micro="Pick the closest. Your specialist will fine-tune it on the call."
+        micro="Pick the closest. Your specialist fine-tunes it on the call."
       />
       <div className="stack gap-2">
-        {Q3_OPTS.map((o) => (
+        {PURPOSE_OPTS.map((o) => (
           <Chip
             key={o.v}
             active={value === o.v}
             onClick={() => onChange(o.v)}
             leftIcon={
-              <span
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 8,
-                  background: "var(--blue-50)",
-                  color: "var(--blue-700)",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
+              <span className="step-icon">
                 <Icon name={o.ico} size="sm" />
               </span>
             }
@@ -128,160 +119,16 @@ export function Q3Purpose({
   );
 }
 
-// ---------- Q4 Turnover ----------
+// ---------- Step: Companies House search ----------
 
-const Q4_OPTS: { v: Q4; l: string; off?: boolean }[] = [
-  { v: "u200", l: "Under £200k", off: true },
-  { v: "200_500", l: "£200k to £500k" },
-  { v: "500_1m", l: "£500k to £1m" },
-  { v: "1m_3m", l: "£1m to £3m" },
-  { v: "3m_plus", l: "£3m+" },
-];
-
-export function Q4Turnover({
+export function StepCompany({
   value,
   onChange,
   onNext,
-  setOfframp,
-}: {
-  value: Q4 | null;
-  onChange: (v: Q4) => void;
-  onNext: () => void;
-  setOfframp: (k: OfframpKind) => void;
-}) {
-  const choice = Q4_OPTS.find((o) => o.v === value);
-  return (
-    <>
-      <StepHeader
-        label="What's your annual turnover?"
-        micro="Lenders use turnover to set your funding range. We match the lender whose box you actually fit — not the one paying us the most."
-      />
-      <div className="stack gap-2">
-        {Q4_OPTS.map((o) => (
-          <Chip key={o.v} active={value === o.v} onClick={() => onChange(o.v)}>
-            {o.l}
-          </Chip>
-        ))}
-      </div>
-      <ContinueBtn
-        disabled={!value}
-        onClick={() => (choice?.off ? setOfframp("turnover") : onNext())}
-      />
-    </>
-  );
-}
-
-// ---------- Q5 Trading ----------
-
-const Q5_OPTS: { v: Q5; l: string; off?: boolean }[] = [
-  { v: "u1", l: "Less than 1 year", off: true },
-  { v: "1_3", l: "1 to 3 years" },
-  { v: "3_5", l: "3 to 5 years" },
-  { v: "5p", l: "5 years+" },
-];
-
-export function Q5Trading({
-  value,
-  onChange,
-  onNext,
-  setOfframp,
-}: {
-  value: Q5 | null;
-  onChange: (v: Q5) => void;
-  onNext: () => void;
-  setOfframp: (k: OfframpKind) => void;
-}) {
-  const choice = Q5_OPTS.find((o) => o.v === value);
-  return (
-    <>
-      <StepHeader
-        label="How long have you been trading?"
-        micro="Trading history is the second number lenders look at. Longer is better, but anything over a year opens real options."
-      />
-      <div className="stack gap-2">
-        {Q5_OPTS.map((o) => (
-          <Chip key={o.v} active={value === o.v} onClick={() => onChange(o.v)}>
-            {o.l}
-          </Chip>
-        ))}
-      </div>
-      <ContinueBtn
-        disabled={!value}
-        onClick={() => (choice?.off ? setOfframp("trading") : onNext())}
-      />
-    </>
-  );
-}
-
-// ---------- Q6 Timing ----------
-
-const Q6_OPTS: { v: Q6; l: string; ico: Parameters<typeof Icon>[0]["name"]; sub: string }[] = [
-  { v: "today", l: "Today, it's urgent", ico: "Flame", sub: "Routes to the rapid-funding subset of our panel." },
-  { v: "week", l: "This week", ico: "CalendarClock", sub: "Most fundings complete inside 24 to 48 hours from match." },
-  { v: "month", l: "This month", ico: "Calendar", sub: "Plenty of runway. We'll set up your match this week." },
-  { v: "explore", l: "Just exploring options", ico: "Compass", sub: "No pressure — your specialist won't push." },
-];
-
-export function Q6Timing({
-  value,
-  onChange,
-  onNext,
-}: {
-  value: Q6 | null;
-  onChange: (v: Q6) => void;
-  onNext: () => void;
-}) {
-  return (
-    <>
-      <StepHeader
-        label="When do you need the money?"
-        micro="Honest answer please. Urgency changes which lenders we approach first."
-      />
-      <div className="stack gap-2">
-        {Q6_OPTS.map((o) => (
-          <Chip
-            key={o.v}
-            active={value === o.v}
-            onClick={() => onChange(o.v)}
-            sublabel={o.sub}
-            leftIcon={
-              <span
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 8,
-                  background: "var(--blue-50)",
-                  color: "var(--blue-700)",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Icon name={o.ico} size="sm" />
-              </span>
-            }
-          >
-            {o.l}
-          </Chip>
-        ))}
-      </div>
-      <ContinueBtn disabled={!value} onClick={onNext} />
-    </>
-  );
-}
-
-// ---------- Q7 Companies House lookup ----------
-
-export function Q7Companies({
-  value,
-  onChange,
-  onNext,
-  setOfframp,
 }: {
   value: Company | null;
   onChange: (c: Company | null) => void;
   onNext: () => void;
-  setOfframp: (k: OfframpKind) => void;
 }) {
   const [q, setQ] = useState(value?.name || "");
   const [open, setOpen] = useState(false);
@@ -310,7 +157,7 @@ export function Q7Companies({
     <>
       <StepHeader
         label="Find your company on Companies House."
-        sub="Type your business name. We'll pull your registered details automatically, so you don't have to."
+        sub="Type your business name. We'll pull your registered details and the appointed officers automatically. No copy-paste, no PDFs."
       />
 
       <div className="field" style={{ position: "relative" }}>
@@ -348,19 +195,7 @@ export function Q7Companies({
                   setQ(c.name);
                 }}
               >
-                <span
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 10,
-                    background: "var(--blue-50)",
-                    color: "var(--blue-700)",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
+                <span className="search-icon">
                   <Icon name="Building2" size="sm" />
                 </span>
                 <span className="stack" style={{ gap: 2, flex: 1, minWidth: 0 }}>
@@ -379,32 +214,19 @@ export function Q7Companies({
       </div>
 
       {value && (
-        <div
-          className="mt-4 card"
-          style={{ padding: 16, background: "var(--emerald-50)", border: "1px solid #A7F3D0" }}
-        >
-          <div className="row gap-3">
-            <span
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 10,
-                background: "#fff",
-                color: "var(--emerald-700)",
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
-              <Icon name="CheckCircle2" size="md" />
+        <div className="mt-4 selected-company">
+          <span className="selected-icon">
+            <Icon name="CircleCheckBig" size="md" />
+          </span>
+          <div className="stack" style={{ gap: 2 }}>
+            <strong style={{ color: "#065F46", fontSize: 15 }}>{value.name}</strong>
+            <span className="tiny" style={{ color: "#047857" }}>
+              Pulled from Companies House · No. {value.num} · {value.addr}
             </span>
-            <div className="stack" style={{ gap: 2 }}>
-              <strong style={{ color: "#065F46", fontSize: 15 }}>{value.name}</strong>
-              <span className="tiny" style={{ color: "#047857" }}>
-                Pulled from Companies House · No. {value.num} · {value.addr}
-              </span>
-            </div>
+            <span className="tiny" style={{ color: "#047857" }}>
+              {value.directors.length} appointed officer
+              {value.directors.length === 1 ? "" : "s"} found
+            </span>
           </div>
         </div>
       )}
@@ -421,115 +243,438 @@ export function Q7Companies({
         </span>
       </div>
 
-      <div className="mt-4 row gap-4" style={{ flexWrap: "wrap", fontSize: 13 }}>
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            onChange({
-              name: q || "Trading-name business",
-              num: "—",
-              addr: "Trading name to be confirmed on call",
-              status: "Trading name",
-            });
-          }}
-          style={{ color: "var(--blue-700)", fontWeight: 600, textDecoration: "none" }}
-        >
-          I trade under a different name →
-        </a>
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            setOfframp("soletrader");
-          }}
-          style={{ color: "var(--muted)", fontWeight: 600, textDecoration: "none" }}
-        >
-          I&apos;m a sole trader →
-        </a>
-      </div>
-
-      <ContinueBtn
-        disabled={!value}
-        onClick={onNext}
-        label="See my Funding Fitness Score"
-      />
+      <ContinueBtn disabled={!value} onClick={onNext} />
     </>
   );
 }
 
-// silence unused fixture warning in case tree-shaking removes searchCompanies inline use
-void COMPANY_FIXTURES;
+// ---------- Step: Director selection ----------
 
-// ---------- Off-ramps ----------
-
-export type OfframpKind = "turnover" | "trading" | "soletrader";
-
-const OFFRAMP_COPY: Record<
-  OfframpKind,
-  { title: string; body: string; cta: string; footnote: string }
-> = {
-  turnover: {
-    title:
-      "We're not the right fit for you yet — and we'd rather say it now than waste your afternoon.",
-    body: "Most of our 100+ lender partners need £200k+ turnover before they'll engage. Good news: there are lenders set up for earlier-stage businesses. Try Funding Circle's small business product or Iwoca's flexible line — both regulated, both faster than a bank.",
-    cta: "Take me to suitable options",
-    footnote: "Come back when you cross £200k. We'll be here.",
-  },
-  trading: {
-    title: "A year in, you'll have proper options. Today, not quite yet.",
-    body: "Our lender panel underwrites established trading. Under 12 months, you're outside what they'll currently take. Worth knowing: start-up loans, asset finance against new equipment, and the British Business Bank's Start Up Loan Scheme are built for where you are right now.",
-    cta: "Show me early-stage options",
-    footnote: "Come back to us once you've got 12 months of trading on the books.",
-  },
-  soletrader: {
-    title: "We currently lend to limited companies only.",
-    body: "Our lender panel is built for limited companies and LLPs. As a sole trader, you'll want a different product set — Iwoca and Funding Circle both have sole-trader products and are FCA-regulated. Worth a look while you're here.",
-    cta: "Show me sole-trader options",
-    footnote: "If you incorporate later, come back. We'll match you on day one.",
-  },
-};
-
-export function OffRamp({ kind, onBack }: { kind: OfframpKind; onBack: () => void }) {
-  const v = OFFRAMP_COPY[kind];
+export function StepDirector({
+  company,
+  value,
+  onChange,
+  onNext,
+}: {
+  company: Company | null;
+  value: Director | null;
+  onChange: (d: Director) => void;
+  onNext: () => void;
+}) {
+  if (!company) {
+    return (
+      <>
+        <StepHeader label="Select your role." sub="Please pick a company first." />
+      </>
+    );
+  }
   return (
-    <div className="offramp">
-      <div className="row gap-3 mb-3">
-        <span
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 10,
-            background: "#fff",
-            color: "var(--amber-700)",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Icon name="Info" size="md" />
+    <>
+      <StepHeader
+        label="Which director are you?"
+        sub={`We pulled ${company.directors.length} appointed officer${
+          company.directors.length === 1 ? "" : "s"
+        } from Companies House for ${company.name}. Pick yours.`}
+      />
+      <div className="stack gap-2">
+        {company.directors.map((d) => (
+          <Chip
+            key={`${d.name}-${d.dobYear}-${d.dobMonth}`}
+            active={value?.name === d.name && value?.dobYear === d.dobYear}
+            onClick={() => onChange(d)}
+            sublabel={`${d.role} · Born ${formatMonthYear(d)}`}
+            leftIcon={
+              <span className="step-icon">
+                <Icon name="CircleUserRound" size="sm" />
+              </span>
+            }
+          >
+            {d.name}
+          </Chip>
+        ))}
+      </div>
+      <p
+        className="tiny muted mt-4"
+        style={{ background: "var(--bg)", padding: 12, borderRadius: 10 }}
+      >
+        Don&apos;t see yourself? Companies House lists only currently appointed officers. If your
+        appointment is in progress, your specialist will reconcile this on the call.
+      </p>
+      <ContinueBtn disabled={!value} onClick={onNext} />
+    </>
+  );
+}
+
+// ---------- Step: DOB day confirmation ----------
+
+export function StepDob({
+  director,
+  value,
+  onChange,
+  onNext,
+}: {
+  director: Director | null;
+  value: number | null;
+  onChange: (n: number) => void;
+  onNext: () => void;
+}) {
+  const [raw, setRaw] = useState(value ? String(value) : "");
+  const day = parseInt(raw, 10);
+  const valid = Number.isInteger(day) && day >= 1 && day <= 31;
+
+  useEffect(() => {
+    if (valid) onChange(day);
+  }, [valid, day, onChange]);
+
+  if (!director) {
+    return (
+      <>
+        <StepHeader label="Confirm date of birth" sub="Please pick a director first." />
+      </>
+    );
+  }
+  return (
+    <>
+      <StepHeader
+        label="Quick identity check."
+        sub={`Companies House shows ${director.name} as born ${formatMonthYear(director)}. Confirm the day to verify it's you.`}
+        micro="We only ever store the day during this session — never linked back to your file."
+      />
+      <div className="dob-row">
+        <div className="dob-cell readonly">
+          <span className="dob-cell-label">Day</span>
+          <input
+            inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={2}
+            value={raw}
+            placeholder="DD"
+            onChange={(e) => setRaw(e.target.value.replace(/\D/g, "").slice(0, 2))}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && valid) onNext();
+            }}
+            autoFocus
+            className="dob-input"
+          />
+        </div>
+        <div className="dob-cell readonly">
+          <span className="dob-cell-label">Month</span>
+          <span className="dob-value">{formatMonthYear(director).split(" ")[0]}</span>
+        </div>
+        <div className="dob-cell readonly">
+          <span className="dob-cell-label">Year</span>
+          <span className="dob-value">{director.dobYear}</span>
+        </div>
+      </div>
+      {raw.length > 0 && !valid && (
+        <p className="tiny" style={{ color: "var(--red-600, #B91C1C)", marginTop: 8 }}>
+          Day must be between 1 and 31.
+        </p>
+      )}
+      <ContinueBtn disabled={!valid} onClick={onNext} />
+    </>
+  );
+}
+
+// ---------- Step: Business performance (turnover) ----------
+
+function parseGBP(raw: string): number | null {
+  const digits = raw.replace(/[^\d]/g, "");
+  if (!digits) return null;
+  return parseInt(digits, 10);
+}
+
+function formatGBPInput(n: number | null): string {
+  if (n == null) return "";
+  return n.toLocaleString("en-GB");
+}
+
+export function StepTurnover({
+  annual,
+  monthly,
+  onChangeAnnual,
+  onChangeMonthly,
+  onNext,
+}: {
+  annual: number | null;
+  monthly: number | null;
+  onChangeAnnual: (n: number | null) => void;
+  onChangeMonthly: (n: number | null) => void;
+  onNext: () => void;
+}) {
+  const max = useMemo(() => qualifyMax(annual), [annual]);
+  const annualValid = (annual ?? 0) >= 50_000;
+  const monthlyValid = (monthly ?? 0) > 0;
+
+  return (
+    <>
+      <StepHeader
+        label="Tell us about your business performance."
+        sub="Turnover is the first number lenders look at. We use this to gauge what panel you fit and what range you'll see on the call."
+      />
+
+      <div className="stack gap-4">
+        <div className="field">
+          <label className="label">Annual turnover (last 12 months)</label>
+          <div className="input-group">
+            <span className="prefix">£</span>
+            <input
+              inputMode="numeric"
+              placeholder="e.g. 450,000"
+              value={formatGBPInput(annual)}
+              onChange={(e) => onChangeAnnual(parseGBP(e.target.value))}
+              autoFocus
+            />
+          </div>
+        </div>
+        <div className="field">
+          <label className="label">Average monthly turnover</label>
+          <div className="input-group">
+            <span className="prefix">£</span>
+            <input
+              inputMode="numeric"
+              placeholder="e.g. 38,000"
+              value={formatGBPInput(monthly)}
+              onChange={(e) => onChangeMonthly(parseGBP(e.target.value))}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className={`qualify-band ${annualValid ? "live" : ""}`}>
+        <span className="qualify-icon">
+          <Icon name="Sparkles" size="sm" />
         </span>
-        <span className="badge amber dot">Honest off-ramp</span>
+        <div className="stack" style={{ gap: 2 }}>
+          <span className="qualify-eyebrow">Based on your turnover</span>
+          <strong className="qualify-amount num">
+            {annualValid
+              ? `You may qualify for up to ${fmtGBP(max)}`
+              : "Enter your annual turnover to see your indicative range"}
+          </strong>
+          {annualValid && (
+            <span className="qualify-foot tiny muted">
+              Indicative only · final terms confirmed by your matched lender.
+            </span>
+          )}
+        </div>
       </div>
-      <h3 style={{ color: "#92400E", fontSize: 20, lineHeight: 1.25 }}>{v.title}</h3>
-      <p className="mt-3" style={{ color: "#78350F" }}>
-        {v.body}
-      </p>
-      <div className="mt-6 row gap-3" style={{ flexWrap: "wrap" }}>
-        <a
-          className="btn primary lg"
-          href="#"
-          onClick={(e) => e.preventDefault()}
-        >
-          {v.cta} <Icon name="ArrowRight" size="sm" />
-        </a>
-        <button className="btn lg" onClick={onBack}>
-          Go back
-        </button>
+
+      <ContinueBtn disabled={!annualValid || !monthlyValid} onClick={onNext} />
+    </>
+  );
+}
+
+// ---------- Step: Contact (residency + address + email + phone) ----------
+
+const RESIDENCY_OPTS: { v: Residency; l: string; ico: Parameters<typeof Icon>[0]["name"] }[] = [
+  { v: "own", l: "I own my home", ico: "House" },
+  { v: "rent", l: "I rent", ico: "KeyRound" },
+  { v: "live-with-family", l: "I live with family", ico: "Users" },
+];
+
+export function StepContact({
+  residency,
+  address,
+  email,
+  phone,
+  onChange,
+  onSubmit,
+  submitting,
+}: {
+  residency: Residency | null;
+  address: AddressSuggestion | null;
+  email: string | null;
+  phone: string | null;
+  onChange: (patch: {
+    residency?: Residency;
+    address?: AddressSuggestion | null;
+    email?: string;
+    phone?: string;
+  }) => void;
+  onSubmit: () => void;
+  submitting: boolean;
+}) {
+  const [addrQ, setAddrQ] = useState(address ? formatAddress(address) : "");
+  const [addrOpen, setAddrOpen] = useState(false);
+  const [addrLoading, setAddrLoading] = useState(false);
+  const aRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!addrQ || addrQ.length < 2) {
+      setAddrOpen(false);
+      return;
+    }
+    setAddrLoading(true);
+    if (aRef.current) clearTimeout(aRef.current);
+    aRef.current = setTimeout(() => {
+      setAddrLoading(false);
+      setAddrOpen(true);
+    }, 250);
+    return () => {
+      if (aRef.current) clearTimeout(aRef.current);
+    };
+  }, [addrQ]);
+
+  const addrSuggestions = addrQ.length >= 2 ? searchAddresses(addrQ) : [];
+
+  const emailValid = !!email && /\S+@\S+\.\S+/.test(email);
+  const phoneDigits = (phone ?? "").replace(/\D/g, "");
+  const phoneValid = phoneDigits.length >= 9 && phoneDigits.length <= 11;
+  const allValid = !!residency && !!address && emailValid && phoneValid;
+
+  return (
+    <>
+      <StepHeader
+        label="Last step — where do we send your match?"
+        sub="Quick personal details. Your specialist rings in as little as 1 hour during working hours with your matched lender's indicative offer."
+      />
+
+      {/* Residency */}
+      <div className="stack gap-2">
+        <label className="label">Do you own or rent your home?</label>
+        <div className="stack gap-2">
+          {RESIDENCY_OPTS.map((o) => (
+            <Chip
+              key={o.v}
+              active={residency === o.v}
+              onClick={() => onChange({ residency: o.v })}
+              leftIcon={
+                <span className="step-icon">
+                  <Icon name={o.ico} size="sm" />
+                </span>
+              }
+            >
+              {o.l}
+            </Chip>
+          ))}
+        </div>
       </div>
-      <p className="mt-4 small" style={{ color: "#92400E" }}>
-        {v.footnote}
+
+      {/* Address */}
+      <div className="field mt-4" style={{ position: "relative" }}>
+        <label className="label">Residential address</label>
+        <div className="input-group">
+          <span className="prefix">
+            <Icon name="MapPin" size="sm" />
+          </span>
+          <input
+            placeholder="Start typing your address or postcode…"
+            value={addrQ}
+            onChange={(e) => {
+              setAddrQ(e.target.value);
+              if (address) onChange({ address: null });
+            }}
+            onFocus={() => addrQ.length >= 2 && setAddrOpen(true)}
+            autoComplete="off"
+          />
+          {addrLoading && (
+            <span style={{ display: "flex", alignItems: "center", padding: "0 12px" }}>
+              <span className="shimmer" style={{ width: 20, height: 20, borderRadius: 999 }} />
+            </span>
+          )}
+        </div>
+        {addrOpen && addrSuggestions.length > 0 && !address && (
+          <div className="search-pop">
+            {addrSuggestions.map((a, i) => (
+              <button
+                key={i}
+                className="search-row"
+                onClick={() => {
+                  onChange({ address: a });
+                  setAddrQ(formatAddress(a));
+                  setAddrOpen(false);
+                }}
+              >
+                <span className="search-icon">
+                  <Icon name="MapPin" size="sm" />
+                </span>
+                <span className="stack" style={{ gap: 2, flex: 1, minWidth: 0 }}>
+                  <strong style={{ color: "var(--navy-900)", fontSize: 14 }}>{a.line1}</strong>
+                  <span className="tiny muted">
+                    {a.city} · {a.postcode}
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+        {address && (
+          <p className="tiny mt-2" style={{ color: "var(--emerald-700, #047857)" }}>
+            <Icon name="Check" size="sm" /> Address verified
+          </p>
+        )}
+      </div>
+
+      {/* Email */}
+      <div className="field mt-4">
+        <label className="label">Email address</label>
+        <div className="input-group">
+          <span className="prefix">
+            <Icon name="Mail" size="sm" />
+          </span>
+          <input
+            type="email"
+            inputMode="email"
+            placeholder="you@yourcompany.co.uk"
+            value={email ?? ""}
+            onChange={(e) => onChange({ email: e.target.value })}
+            autoComplete="email"
+          />
+        </div>
+      </div>
+
+      {/* Phone */}
+      <div className="field mt-4">
+        <label className="label">Mobile number</label>
+        <div className="input-group phone-group">
+          <span className="prefix phone-prefix" aria-label="United Kingdom dial code">
+            <span style={{ fontSize: 14 }}>🇬🇧</span>
+            <span className="num">+44</span>
+          </span>
+          <input
+            type="tel"
+            inputMode="tel"
+            placeholder="7XXX XXX XXX"
+            value={phone ?? ""}
+            onChange={(e) =>
+              onChange({ phone: e.target.value.replace(/[^\d\s]/g, "").slice(0, 15) })
+            }
+            autoComplete="tel-national"
+            maxLength={15}
+          />
+        </div>
+        <p className="tiny muted mt-2">UK mobile numbers only. We never call from a withheld number.</p>
+      </div>
+
+      <button
+        type="button"
+        className="btn primary xl mt-6"
+        style={{ width: "100%", padding: "18px 22px" }}
+        disabled={!allValid || submitting}
+        onClick={onSubmit}
+      >
+        {submitting
+          ? "Sending…"
+          : "See my match"}
+        {!submitting && <Icon name="ArrowRight" size="sm" />}
+      </button>
+
+      <p
+        className="tiny muted mt-3"
+        style={{
+          background: "#F8F9FB",
+          border: "1px solid var(--border)",
+          padding: 12,
+          borderRadius: 10,
+          lineHeight: 1.55,
+        }}
+      >
+        By submitting, you agree that Fundsmart AI may share your information with our matched
+        FCA-regulated lender and with credit reference and fraud prevention agencies, who will run
+        a soft credit search and identity check. A soft search has no impact on your credit score.
+        We do not sell your data. See our Privacy Policy for the full detail.
       </p>
-    </div>
+    </>
   );
 }

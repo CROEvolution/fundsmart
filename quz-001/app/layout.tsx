@@ -9,9 +9,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Fundsmart — Get matched to one lender",
+  title: "Fundsmart · Get matched to one lender",
   description:
-    "One matched lender. One soft search. No comparison-site cowboys. See what your business qualifies for in 2 minutes.",
+    "Bank said no to your £50k+? In 2 minutes, we find the 1 lender most likely to say yes. Soft search only. No cowboys.",
 };
 
 export default function RootLayout({

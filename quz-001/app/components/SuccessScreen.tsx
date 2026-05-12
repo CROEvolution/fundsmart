@@ -36,18 +36,18 @@ export default function SuccessScreen({
               margin: "0 auto",
             }}
           >
-            <Icon name="CheckCircle2" size="lg" />
+            <Icon name="CircleCheckBig" size="lg" />
           </div>
           <h2 className="mt-4" style={{ fontSize: 28 }}>
-            Got it, {contact.name.split(" ")[0]}. Your match is queued.
+            Sorted, {contact.name.split(" ")[0]}. Your match is queued.
           </h2>
           <p className="muted mt-3" style={{ maxWidth: 480, margin: "12px auto 0" }}>
-            We&apos;ve got your details. Your specialist will ring{" "}
+            We&apos;ve got your file. Your specialist rings{" "}
             <span className="num" style={{ fontWeight: 700, color: "var(--navy-900)" }}>
               +44 {contact.phone}
             </span>{" "}
-            in as little as 1 hour during working hours, with your full report and the indicative
-            offer from your matched lender.
+            in as little as 1 hour during working hours, with the full report and your matched
+            lender&apos;s indicative offer.
           </p>
           <div
             className="mt-6"
@@ -69,7 +69,7 @@ export default function SuccessScreen({
               <span className="badge emerald dot">Locked in</span>
             </div>
             <div className="stack gap-2 small">
-              <Row k="Funding Fitness Score" v={`${profile.score} / 100`} />
+              <Row k="Match score" v={`${profile.score} / 100`} />
               <Row k="Indicative range" v={`${fmtGBP(profile.low)} – ${fmtGBP(profile.high)}`} />
               <Row k="Indicative rate from" v={`${profile.apr}% APR`} />
               <Row k="Report sent to" v={contact.email} />

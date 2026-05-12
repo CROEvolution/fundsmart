@@ -1,6 +1,6 @@
-type Props = { value: number; label?: string };
+type Props = { value: number; label?: string; shimmer?: boolean };
 
-export default function ProgressBar({ value, label }: Props) {
+export default function ProgressBar({ value, label, shimmer = true }: Props) {
   return (
     <div className="stack gap-2" style={{ width: "100%" }}>
       {label && (
@@ -16,7 +16,11 @@ export default function ProgressBar({ value, label }: Props) {
           </span>
         </div>
       )}
-      <div className="progress" role="progressbar" aria-valuenow={value}>
+      <div
+        className={`progress${shimmer ? " progress-shimmer" : ""}`}
+        role="progressbar"
+        aria-valuenow={value}
+      >
         <span style={{ width: `${value}%` }} />
       </div>
     </div>

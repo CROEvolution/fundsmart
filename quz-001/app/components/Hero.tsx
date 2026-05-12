@@ -1,112 +1,52 @@
 "use client";
 
-import { Badge, Chip, HairDivider, Icon, PriceChip, TrustStrip } from "./ui";
-import type { Q1, Q2 } from "@/lib/state";
+import { Icon, PriceChip, TrustStrip } from "./ui";
+import ProgressBar from "./ui/ProgressBar";
+import { AMOUNT_LABEL, secondsLeft, type Amount } from "@/lib/state";
+
+const TOTAL_STEPS = 7;
+const HERO_STEP = 1;
 
 type Props = {
-  q1: Q1 | null;
-  setQ1: (v: Q1) => void;
-  q2: Q2 | null;
-  setQ2: (v: Q2) => void;
+  amount: Amount | null;
+  setAmount: (v: Amount) => void;
   onContinue: () => void;
+  cardRef?: React.RefObject<HTMLDivElement | null>;
 };
 
-const Q1_OPTS: { v: Q1; l: string; sub: string; ico: "XCircle" | "FastForward" | "CircleHelp" }[] = [
-  {
-    v: "rejected",
-    l: "Bank said no",
-    sub: "You're not alone. 40% of UK SME loan applications get rejected. Their algorithm, not your business.",
-    ico: "XCircle",
-  },
-  {
-    v: "skipping",
-    l: "Skipping the bank",
-    sub: "Smart move. Bank lending takes weeks. Private finance moves in hours.",
-    ico: "FastForward",
-  },
-  {
-    v: "untried",
-    l: "Haven't tried yet",
-    sub: "Most operators who come to us don't bother with the bank first. Saves the hard credit pull.",
-    ico: "CircleHelp",
-  },
+const AMOUNTS: Amount[] = ["10k", "25k", "50k", "100k", "250k", "1m"];
+
+const PANEL_LOGOS = [
+  { name: "Iwoca", src: "/lender-logos/iwoca.webp" },
+  { name: "Funding Circle", src: "/lender-logos/funding-circle.webp" },
+  { name: "Halo", src: "/lender-logos/halo.webp" },
+  { name: "Bizcap", src: "/lender-logos/bizcap.webp" },
+  { name: "Funding Options by Tide", src: "/lender-logos/funding-options-by-tide.webp" },
 ];
 
-const AMOUNTS: Q2[] = ["£10k", "£25k", "£50k", "£100k", "£250k", "£1m+"];
-
-export default function Hero({ q1, setQ1, q2, setQ2, onContinue }: Props) {
+export default function Hero({ amount, setAmount, onContinue, cardRef }: Props) {
   return (
     <section className="hero hero-band" data-screen-label="Hero">
       <div className="container">
         <div className="hero-grid">
-          {/* Left: pitch */}
-          <div className="stack gap-5">
-            <div className="row gap-2" style={{ flexWrap: "wrap" }}>
-              <Badge variant="emerald" dot>
-                Soft search only · no credit impact
-              </Badge>
-              <Badge
-                dot
-                style={{
-                  color: "var(--blue-700)",
-                  background: "var(--blue-50)",
-                  borderColor: "var(--blue-200)",
-                }}
-              >
-                FCA-regulated brokerage
-              </Badge>
-            </div>
+          {/* TOP: h1 + 2-line sub. Above the form on mobile. */}
+          <div className="hero-copy-top">
             <h1>
-              One matched lender.
-              <br />
-              One soft search.
-              <br />
-              <span style={{ color: "var(--green-400)" }}>No comparison-site cowboys.</span>
+              Bank said no to your SME loan? In 2 minutes, we find the{" "}
+              <span style={{ color: "var(--green-400)" }}>1 lender</span> most likely to say
+              yes.
             </h1>
-            <p style={{ fontSize: 18, maxWidth: "56ch" }} className="on-dark">
-              Fundsmart&apos;s AI pulls your business from Companies House, looks at your real cashflow,
-              and matches you to the single lender most likely to approve. Not twelve. Not your data
-              sold on. <strong>One.</strong>
+            <p className="hero-sub on-dark">
+              <strong>40% of UK SME loan applications get rejected.</strong> One soft search, one
+              matched lender, one decision &mdash; funded in as soon as 4 hours.
             </p>
-            <TrustStrip
-              items={[
-                { icon: "ShieldCheck", text: "Soft credit search only, zero impact on your score" },
-                { icon: "Users", text: "100+ FCA-regulated lenders, matched to one" },
-                {
-                  icon: "Zap",
-                  text: "Approval in as little as 1 hour, funded in as soon as 4 hours",
-                },
-              ]}
-            />
-
-            <div className="mt-4 stack gap-2">
-              <span
-                className="tiny muted"
-                style={{ fontWeight: 600, textTransform: "uppercase", letterSpacing: ".1em" }}
-              >
-                Compared across our panel
-              </span>
-              <div className="row gap-6" style={{ flexWrap: "wrap" }}>
-                {["Iwoca", "Funding Circle", "Halo", "Bizcap", "Tide"].map((l) => (
-                  <span
-                    key={l}
-                    style={{
-                      fontWeight: 700,
-                      letterSpacing: "-.01em",
-                      fontSize: 15,
-                      color: "rgba(230,237,248,.5)",
-                    }}
-                  >
-                    {l}
-                  </span>
-                ))}
-              </div>
-            </div>
           </div>
 
-          {/* Right: quiz card */}
+          {/* FORM CARD — right column on desktop, second on mobile */}
           <div
-            className="card"
+            ref={cardRef}
+            className="card hero-card"
+            data-hero-card
             style={{
               padding: 0,
               overflow: "hidden",
@@ -114,90 +54,26 @@ export default function Hero({ q1, setQ1, q2, setQ2, onContinue }: Props) {
                 "0 24px 48px -16px rgba(11,18,32,.10), 0 8px 16px -8px rgba(11,18,32,.06)",
             }}
           >
-            <div
-              style={{
-                padding: "18px 22px",
-                background: "linear-gradient(180deg, #F4FCF8, #E9FBF1)",
-                borderBottom: "1px solid var(--green-200)",
-              }}
-            >
-              <div className="row between">
-                <span
-                  className="row gap-2 small"
-                  style={{ fontWeight: 600, color: "var(--blue-700)" }}
-                >
-                  <Icon name="Sparkles" size="sm" />
-                  Free Funding Fitness Score
-                </span>
-                <span className="tiny muted">About 2 minutes</span>
-              </div>
+            <div className="hero-card-head hero-card-progress">
+              <ProgressBar
+                value={(HERO_STEP / TOTAL_STEPS) * 100}
+                label={`Step ${HERO_STEP} of ${TOTAL_STEPS} · About ${secondsLeft(
+                  HERO_STEP,
+                  TOTAL_STEPS,
+                )} seconds left`}
+              />
             </div>
 
-            <div className="stack gap-6" style={{ padding: 24 }}>
-              {/* Q1 */}
+            <div className="stack gap-5 hero-card-body">
               <div className="stack gap-3">
-                <div className="row between" style={{ alignItems: "baseline" }}>
-                  <label className="label">
-                    Q1. Has your bank already said no — or are you skipping them this time?
-                  </label>
-                  <Badge variant="blue" dot>
-                    1 of 7
-                  </Badge>
-                </div>
-                <div className="stack gap-2">
-                  {Q1_OPTS.map((o) => (
-                    <Chip
-                      key={o.v}
-                      active={q1 === o.v}
-                      onClick={() => setQ1(o.v)}
-                      sublabel={q1 === o.v ? o.sub : undefined}
-                      leftIcon={
-                        <span
-                          style={{
-                            width: 28,
-                            height: 28,
-                            borderRadius: 8,
-                            background: "var(--blue-50)",
-                            color: "var(--blue-700)",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          <Icon name={o.ico} size="sm" />
-                        </span>
-                      }
-                    >
-                      {o.l}
-                    </Chip>
-                  ))}
-                </div>
-              </div>
-
-              <HairDivider />
-
-              {/* Q2 */}
-              <div
-                className={`stack gap-3 ${q1 ? "fade-in" : ""}`}
-                style={{
-                  opacity: q1 ? 1 : 0.45,
-                  pointerEvents: q1 ? "auto" : "none",
-                  transition: "opacity .3s",
-                }}
-              >
-                <div className="row between" style={{ alignItems: "baseline" }}>
-                  <label className="label">Q2. How much funding do you need?</label>
-                  <Badge dot style={{ background: "var(--bg)" }}>
-                    2 of 7
-                  </Badge>
-                </div>
+                <label className="label">How much funding do you need?</label>
                 <p className="tiny muted" style={{ marginTop: -4 }}>
-                  Soft credit search only. No impact on your score.
+                  Soft credit search only. No impact on your score. Your details aren&apos;t sold on.
                 </p>
                 <div className="grid-6">
                   {AMOUNTS.map((a) => (
-                    <PriceChip key={a} active={q2 === a} onClick={() => setQ2(a)}>
-                      {a}
+                    <PriceChip key={a} active={amount === a} onClick={() => setAmount(a)}>
+                      {AMOUNT_LABEL[a]}
                     </PriceChip>
                   ))}
                 </div>
@@ -205,13 +81,13 @@ export default function Hero({ q1, setQ1, q2, setQ2, onContinue }: Props) {
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    setQ2("other");
+                    setAmount("other");
                   }}
                   className="tiny"
                   style={{
                     color: "var(--blue-700)",
                     fontWeight: 600,
-                    textDecoration: q2 === "other" ? "underline" : "none",
+                    textDecoration: amount === "other" ? "underline" : "none",
                   }}
                 >
                   Other amount →
@@ -220,11 +96,11 @@ export default function Hero({ q1, setQ1, q2, setQ2, onContinue }: Props) {
 
               <button
                 className="btn primary xl"
-                disabled={!q1 || !q2}
+                disabled={!amount}
                 onClick={onContinue}
                 style={{ width: "100%", padding: "18px 22px" }}
               >
-                See my Funding Fitness Score
+                Continue
                 <Icon name="ArrowRight" size="sm" />
               </button>
 
@@ -246,6 +122,41 @@ export default function Hero({ q1, setQ1, q2, setQ2, onContinue }: Props) {
                 <span className="row gap-2">
                   <Icon name="Lock" size="sm" /> Data never sold
                 </span>
+              </div>
+            </div>
+          </div>
+
+          {/* TAIL: trust strip + lender logos. Below the form on mobile. */}
+          <div className="hero-copy-tail">
+            <TrustStrip
+              items={[
+                { icon: "ShieldCheck", text: "Soft credit search only · zero impact on your score" },
+                { icon: "Users", text: "100+ FCA-regulated lenders · matched to one" },
+                {
+                  icon: "Zap",
+                  text: "Approval in as little as 1 hour · funded in as soon as 4 hours",
+                },
+              ]}
+            />
+
+            <div className="mt-4 stack gap-3">
+              <span
+                className="tiny muted"
+                style={{ fontWeight: 600, textTransform: "uppercase", letterSpacing: ".1em" }}
+              >
+                Compared across our panel
+              </span>
+              <div className="panel-logos">
+                {PANEL_LOGOS.map((l) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={l.name}
+                    src={l.src}
+                    alt={l.name}
+                    loading="lazy"
+                    className="panel-logo"
+                  />
+                ))}
               </div>
             </div>
           </div>

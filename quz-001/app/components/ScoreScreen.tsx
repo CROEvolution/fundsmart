@@ -6,8 +6,7 @@ import {
   computeProfile,
   fmtGBP,
   PURPOSE_LABEL,
-  TRADING_LABEL,
-  TURNOVER_LABEL,
+  RESIDENCY_LABEL,
 } from "@/lib/state";
 import Icon from "./ui/Icon";
 import ScoreRing from "./ui/ScoreRing";
@@ -70,13 +69,13 @@ export default function ScoreScreen({
           >
             <ScoreRing value={val} />
             <div className="stack gap-3" style={{ maxWidth: 380 }}>
-              <span className="eyebrow">Your Funding Fitness Score</span>
+              <span className="eyebrow">Your match score</span>
               <h2 style={{ fontSize: 28, lineHeight: 1.15 }}>
-                {val} out of 100. You&apos;re a strong match.
+                {val} / 100. You&apos;re a strong match.
               </h2>
               <p className="muted small">
-                Based on what you&apos;ve told us, here&apos;s where you stand against our 100+
-                lender panel.
+                Against our panel of 100+ FCA-regulated lenders. Here&apos;s where you stand and
+                what your indicative range looks like.
               </p>
             </div>
           </div>
@@ -101,7 +100,7 @@ export default function ScoreScreen({
                     textTransform: "uppercase",
                   }}
                 >
-                  Indicative funding range
+                  Indicative funding available
                 </div>
                 <div
                   className="num"
@@ -173,34 +172,39 @@ export default function ScoreScreen({
 }
 
 function SignalList({ answers, percentile }: { answers: Answers; percentile: number }) {
-  const { q3, q4, q5, q6 } = answers;
-  const timeframe =
-    q6 === "today"
-      ? "as soon as 4 hours after sign-off"
-      : q6 === "week"
-        ? "24 to 48 hours"
-        : "this month";
-  const items: { icon: Parameters<typeof Icon>[0]["name"]; kind: "emerald" | "amber" | "blue"; title: string; body: string }[] = [
+  const annual = answers.annualTurnover ?? 0;
+  const items: {
+    icon: Parameters<typeof Icon>[0]["name"];
+    kind: "emerald" | "amber" | "blue";
+    title: string;
+    body: string;
+  }[] = [
     {
       icon: "TrendingUp",
       kind: "emerald",
-      title: `Turnover signal: ${q4 ? TURNOVER_LABEL[q4] : "qualified"}`,
+      title: `Turnover signal: ${annual > 0 ? fmtGBP(annual) : "qualified"}`,
       body: `Puts you in the top ${percentile}% of approved applicants on our panel.`,
     },
     {
-      icon: "CalendarCheck2",
+      icon: "Building2",
       kind: "emerald",
-      title: `Trading history: ${q5 ? TRADING_LABEL[q5] : "established"}`,
-      body: "That's the level our lenders want to see before they engage.",
+      title: `Company: ${answers.company?.name ?? "verified"}`,
+      body: `Pulled live from Companies House. Director on file: ${
+        answers.director?.name ?? "verified"
+      }.`,
     },
     {
       icon: "Rocket",
-      kind: q3 === "vat" ? "amber" : "blue",
-      title: `Purpose: ${q3 ? PURPOSE_LABEL[q3] : "qualified"}`,
+      kind: answers.purpose === "vat" ? "amber" : "blue",
+      title: `Purpose: ${
+        answers.purpose ? PURPOSE_LABEL[answers.purpose] : "qualified"
+      }`,
       body:
-        q3 === "vat"
-          ? `VAT/HMRC bridge is one of our fastest-routed reasons — typically funded inside ${timeframe}.`
-          : `One of the three funding reasons our lender panel funds fastest — typically inside ${timeframe}.`,
+        answers.purpose === "vat"
+          ? "VAT/HMRC bridge is one of our fastest-routed reasons. Typically funded inside 24–48 hours from match."
+          : `One of the funding reasons our lender panel funds fastest. ${
+              answers.residency ? RESIDENCY_LABEL[answers.residency] + "." : ""
+            }`,
     },
   ];
   return (

@@ -1,8 +1,13 @@
 // Navy legal footer. Copy taken verbatim from app.fundsmart.ai footer.
+import Logo from "./ui/Logo";
+
 export default function Footer() {
   return (
     <footer className="legal" data-screen-label="Footer">
       <div className="container narrow center">
+        <div className="legal-logo">
+          <Logo variant="light" className="legal-logo-link" />
+        </div>
         <p style={{ fontSize: 14, lineHeight: 1.7, maxWidth: "72ch", margin: "0 auto" }}>
           Fundsmart AI is an independent credit broker, not a lender. We are not tied to any single
           lender and offer access to a panel of FCA-regulated lenders. We do not charge you any fee

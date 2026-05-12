@@ -1,22 +1,26 @@
-// Real Fundsmart wordmark logo. Renders white-on-transparent, so it works
-// across navy backgrounds (topbar, footer). For light-background contexts
-// the brand would need a dark variant; not used in the current page.
-type Props = { height?: number };
+// Fundsmart wordmark — uses the official brand image from /public.
+// The source asset is dark (navy text + green chart), so on dark
+// backgrounds we apply `filter: invert(1)` via the `.logo-img.light`
+// class. Pass variant="dark" to render the source colors unchanged
+// for light backgrounds.
+type Props = { variant?: "light" | "dark"; className?: string };
 
-export default function Logo({ height = 28 }: Props) {
+export default function Logo({ variant = "light", className }: Props) {
   return (
     <a
       href="#"
       onClick={(e) => e.preventDefault()}
-      className="logo-row"
+      className={`logo-row${className ? ` ${className}` : ""}`}
       aria-label="Fundsmart"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/fundsmart-logo.webp"
         alt="Fundsmart"
-        height={height}
-        style={{ height, width: "auto", display: "block" }}
+        width={126}
+        height={28}
+        className={`logo-img ${variant}`}
+        decoding="async"
+        loading="eager"
       />
     </a>
   );

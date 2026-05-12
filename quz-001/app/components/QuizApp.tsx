@@ -1,17 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   type Answers,
   type ContactDetails,
-  emptyAnswers,
-  type Q1,
-  type Q2,
-  type Q3,
-  type Q4,
-  type Q5,
-  type Q6,
+  type AddressSuggestion,
+  type Amount,
   type Company,
+  type Director,
+  type Purpose,
+  type Residency,
+  emptyAnswers,
 } from "@/lib/state";
 
 import { Icon } from "./ui";
@@ -19,70 +18,122 @@ import TopBar from "./TopBar";
 import Hero from "./Hero";
 import ModalShell from "./ModalShell";
 import {
-  Q3Purpose,
-  Q4Turnover,
-  Q5Trading,
-  Q6Timing,
-  Q7Companies,
-  OffRamp,
-  type OfframpKind,
+  StepPurpose,
+  StepCompany,
+  StepDirector,
+  StepDob,
+  StepTurnover,
+  StepContact,
 } from "./QuizSteps";
 import ScoreScreen from "./ScoreScreen";
-import ContactScreen from "./ContactScreen";
 import SuccessScreen from "./SuccessScreen";
 import { Stats, HowItWorks, LenderCompetition, CaseStudies, WhyOneLender, FAQ } from "./Blocks";
 import Footer from "./Footer";
 
-type Phase = "landing" | "quiz" | "score" | "contact" | "success";
+type Phase = "landing" | "quiz" | "score" | "success";
+
+// Step 1 = hero (amount). Steps 2..7 live in the modal.
+const TOTAL_STEPS = 7;
+const MODAL_START = 2;
+const MODAL_END = 7;
 
 export default function QuizApp() {
   const [phase, setPhase] = useState<Phase>("landing");
-  const [step, setStep] = useState(3);
-  const [offramp, setOfframp] = useState<OfframpKind | null>(null);
+  const [step, setStep] = useState(MODAL_START);
+  const [submitting, setSubmitting] = useState(false);
   const [contact, setContact] = useState<ContactDetails | null>(null);
   const [answers, setAnswers] = useState<Answers>(emptyAnswers);
 
-  function setQ1(v: Q1) { setAnswers((a) => ({ ...a, q1: v })) }
-  function setQ2(v: Q2) { setAnswers((a) => ({ ...a, q2: v })) }
-  function setQ3(v: Q3) { setAnswers((a) => ({ ...a, q3: v })) }
-  function setQ4(v: Q4) { setAnswers((a) => ({ ...a, q4: v })) }
-  function setQ5(v: Q5) { setAnswers((a) => ({ ...a, q5: v })) }
-  function setQ6(v: Q6) { setAnswers((a) => ({ ...a, q6: v })) }
-  function setQ7(v: Company | null) { setAnswers((a) => ({ ...a, q7: v })) }
+  // Sticky bottom CTA only shows once the hero card is off-screen.
+  const heroCardRef = useRef<HTMLDivElement | null>(null);
+  const [heroCardVisible, setHeroCardVisible] = useState(true);
+  useEffect(() => {
+    const el = heroCardRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setHeroCardVisible(entry.isIntersecting),
+      { rootMargin: "0px 0px -10% 0px", threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  function setAmount(v: Amount) { setAnswers((a) => ({ ...a, amount: v })) }
+  function setPurpose(v: Purpose) { setAnswers((a) => ({ ...a, purpose: v })) }
+  function setCompany(v: Company | null) {
+    setAnswers((a) => ({ ...a, company: v, director: null, dobDay: null }));
+  }
+  function setDirector(v: Director) {
+    setAnswers((a) => ({ ...a, director: v, dobDay: null }));
+  }
+  function setDobDay(v: number) { setAnswers((a) => ({ ...a, dobDay: v })) }
+  function setAnnual(n: number | null) { setAnswers((a) => ({ ...a, annualTurnover: n })) }
+  function setMonthly(n: number | null) { setAnswers((a) => ({ ...a, monthlyTurnover: n })) }
+  function patchContact(p: {
+    residency?: Residency;
+    address?: AddressSuggestion | null;
+    email?: string;
+    phone?: string;
+  }) {
+    setAnswers((a) => ({
+      ...a,
+      residency: p.residency ?? a.residency,
+      address: p.address === undefined ? a.address : p.address,
+      email: p.email ?? a.email,
+      phone: p.phone ?? a.phone,
+    }));
+  }
 
   function start() {
-    if (!answers.q1 || !answers.q2) {
+    if (!answers.amount) {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    setStep(3);
+    setStep(MODAL_START);
     setPhase("quiz");
   }
 
   function close() {
     setPhase("landing");
-    setOfframp(null);
   }
 
   function nextFrom(s: number) {
-    if (s < 7) setStep(s + 1);
-    else setPhase("score");
+    if (s < MODAL_END) setStep(s + 1);
+    else submitLead();
   }
   function backFrom(s: number) {
-    if (s > 3) setStep(s - 1);
+    if (s > MODAL_START) setStep(s - 1);
     else setPhase("landing");
+  }
+
+  function submitLead() {
+    setSubmitting(true);
+    const c: ContactDetails = {
+      name: answers.director?.name ?? "Director",
+      email: answers.email ?? "",
+      phone: answers.phone ?? "",
+    };
+    void fetch("/api/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...c, answers }),
+    }).catch(() => {});
+    setTimeout(() => {
+      setContact(c);
+      setSubmitting(false);
+      setPhase("score");
+    }, 700);
   }
 
   return (
     <div className="page">
-      <TopBar onStart={start} />
+      <TopBar />
 
       <Hero
-        q1={answers.q1}
-        setQ1={setQ1}
-        q2={answers.q2}
-        setQ2={setQ2}
+        amount={answers.amount}
+        setAmount={setAmount}
         onContinue={start}
+        cardRef={heroCardRef}
       />
 
       <Stats />
@@ -92,7 +143,6 @@ export default function QuizApp() {
       <WhyOneLender />
       <FAQ />
 
-      {/* Final CTA band */}
       <section
         className="section"
         style={{
@@ -113,15 +163,18 @@ export default function QuizApp() {
             1 hour during working hours.
           </p>
           <button className="btn primary xl" style={{ marginTop: 8 }} onClick={start}>
-            See my Funding Fitness Score <Icon name="ArrowRight" size="sm" />
+            See my match <Icon name="ArrowRight" size="sm" />
           </button>
         </div>
       </section>
 
       <Footer />
 
-      {/* Sticky mobile bottom */}
-      <div className="sticky-cta">
+      <div
+        className="sticky-cta"
+        data-visible={heroCardVisible ? "false" : "true"}
+        aria-hidden={heroCardVisible ? "true" : "false"}
+      >
         <div className="stack" style={{ gap: 0 }}>
           <span style={{ fontWeight: 700, color: "var(--navy-900)", fontSize: 14 }}>
             Get matched in 2 minutes
@@ -133,65 +186,71 @@ export default function QuizApp() {
         </button>
       </div>
 
-      {/* Quiz modal */}
-      {phase === "quiz" && !offramp && (
-        <ModalShell step={step} total={7} onBack={() => backFrom(step)} onClose={close}>
+      {phase === "quiz" && (
+        <ModalShell
+          step={step}
+          total={TOTAL_STEPS}
+          onBack={() => backFrom(step)}
+          onClose={close}
+        >
+          {step === 2 && (
+            <StepPurpose
+              value={answers.purpose}
+              onChange={setPurpose}
+              onNext={() => nextFrom(2)}
+            />
+          )}
           {step === 3 && (
-            <Q3Purpose value={answers.q3} onChange={setQ3} onNext={() => nextFrom(3)} />
+            <StepCompany
+              value={answers.company}
+              onChange={setCompany}
+              onNext={() => nextFrom(3)}
+            />
           )}
           {step === 4 && (
-            <Q4Turnover
-              value={answers.q4}
-              onChange={setQ4}
+            <StepDirector
+              company={answers.company}
+              value={answers.director}
+              onChange={setDirector}
               onNext={() => nextFrom(4)}
-              setOfframp={setOfframp}
             />
           )}
           {step === 5 && (
-            <Q5Trading
-              value={answers.q5}
-              onChange={setQ5}
+            <StepDob
+              director={answers.director}
+              value={answers.dobDay}
+              onChange={setDobDay}
               onNext={() => nextFrom(5)}
-              setOfframp={setOfframp}
             />
           )}
           {step === 6 && (
-            <Q6Timing value={answers.q6} onChange={setQ6} onNext={() => nextFrom(6)} />
-          )}
-          {step === 7 && (
-            <Q7Companies
-              value={answers.q7}
-              onChange={setQ7}
-              onNext={() => nextFrom(7)}
-              setOfframp={setOfframp}
+            <StepTurnover
+              annual={answers.annualTurnover}
+              monthly={answers.monthlyTurnover}
+              onChangeAnnual={setAnnual}
+              onChangeMonthly={setMonthly}
+              onNext={() => nextFrom(6)}
             />
           )}
-        </ModalShell>
-      )}
-
-      {/* Off-ramp overlay (inside quiz) */}
-      {phase === "quiz" && offramp && (
-        <ModalShell step={step} total={7} onBack={() => setOfframp(null)} onClose={close}>
-          <OffRamp kind={offramp} onBack={() => setOfframp(null)} />
+          {step === 7 && (
+            <StepContact
+              residency={answers.residency}
+              address={answers.address}
+              email={answers.email}
+              phone={answers.phone}
+              onChange={patchContact}
+              onSubmit={submitLead}
+              submitting={submitting}
+            />
+          )}
         </ModalShell>
       )}
 
       {phase === "score" && (
         <ScoreScreen
           answers={answers}
-          onContinue={() => setPhase("contact")}
+          onContinue={() => setPhase("success")}
           onClose={close}
-        />
-      )}
-      {phase === "contact" && (
-        <ContactScreen
-          answers={answers}
-          onSubmit={(c) => {
-            setContact(c);
-            setPhase("success");
-          }}
-          onClose={close}
-          onBack={() => setPhase("score")}
         />
       )}
       {phase === "success" && contact && (

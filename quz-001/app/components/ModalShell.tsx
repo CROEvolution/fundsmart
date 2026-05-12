@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Icon from "./ui/Icon";
 import ModalTrust from "./ui/ModalTrust";
 import ProgressBar from "./ui/ProgressBar";
+import { secondsLeft } from "@/lib/state";
 
 type Props = {
   children: ReactNode;
@@ -38,7 +39,7 @@ export default function ModalShell({ children, step, total, onClose, onBack }: P
             <div style={{ flex: 1, minWidth: 0 }}>
               <ProgressBar
                 value={pct}
-                label={`Step ${step} of ${total} · About 90 seconds left`}
+                label={`Step ${step} of ${total} · About ${secondsLeft(step, total)} seconds left`}
               />
             </div>
           </div>
