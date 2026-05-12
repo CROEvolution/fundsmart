@@ -10,43 +10,60 @@ Primary client contact: Max Hein (max@atlasmarketing.pro)
 
 ## Repo structure
 
+One Next.js 16 app at the repo root. Each landing page is a route under `/app`.
+
 ```
 fundsmart/
-├── .croev/                     ← Workspace docs (research, copy, teardown, compliance)
-│   ├── context.json            ← Brand metadata + LP IDs from Operate
-│   ├── brand-research.md       ← First-pass site scrape + angle hypotheses
-│   ├── landing-page-teardown.md← Live competitor funnel teardown
-│   ├── research-synthesis.md   ← VOC + 6 angle families + Quiz recommendations
-│   ├── copy-QUZ-001-V1.md      ← Quiz copy doc (Anti-Spam angle)
-│   ├── copy-ADV-001-V1.md      ← Advertorial copy doc (GGS angle)
-│   └── angles.json             ← Angle index for the brand
+├── .croev/                         ← Workspace docs (research, copy, teardown, compliance)
+│   ├── context.json
+│   ├── brand-research.md
+│   ├── landing-page-teardown.md
+│   ├── research-synthesis.md
+│   ├── copy-QUZ-001-V*.md
+│   ├── copy-ADV-001-V1.md
+│   └── angles.json
 │
-├── quz-001/                    ← Quiz LP, Anti-Spam / AI-Matched angle (BUILT)
-│   └── (Next.js 16 app)
+├── app/
+│   ├── layout.tsx                  ← Global layout (Inter font, root metadata template)
+│   ├── globals.css                 ← Global styles
+│   ├── page.tsx                    ← Root index → redirects to /quz-001
+│   ├── api/lead/route.ts           ← Shared lead-capture endpoint (mock)
+│   ├── quz-001/                    ← Quiz LP, Anti-Spam / AI-Matched angle (BUILT)
+│   │   ├── page.tsx
+│   │   └── components/             ← Route-scoped components
+│   ├── sal-001/                    ← Sales LP, Line-of-Credit angle (TODO)
+│   └── adv-001/                    ← Advertorial, GGS angle (TODO)
 │
-├── sal-001/                    ← Sales LP, Line-of-Credit angle (TODO)
-└── adv-001/                    ← Advertorial, GGS angle (copy ready, build TODO)
+├── lib/                            ← Shared utilities (state, copy, helpers)
+└── public/                         ← Shared static assets (logos, favicons)
 ```
 
-## Per-LP builds
+## Running locally
 
-Each LP is an independent Next.js app. Run, build, and deploy each separately.
+```bash
+npm install
+npm run dev          # http://localhost:3000 → /quz-001
+```
+
+Visit individual routes directly:
+
+- `/quz-001` — Quiz LP (Anti-Spam / AI-Matched)
+- Future: `/sal-001`, `/adv-001`, etc.
+
+## Deployment
+
+One Vercel project for the repo. The root URL `/` redirects to the first live LP; each new landing page ships as a new route. Branch deploys give every PR a preview URL across all routes.
+
+## Per-LP angles
 
 ### QUZ-001 — Quiz
 
-```bash
-cd quz-001
-npm install
-npm run dev      # http://localhost:3000
-```
-
 - Primary angle: **Anti-Spam / AI-Matched** ("One matched lender. One soft search. No comparison-site cowboys.")
-- 7-question funnel with inline Q1/Q2 pre-step + modal Q3–Q7
-- Funding Fitness Score reveal screen with dynamic reasons + indicative range
-- Honest off-ramps for sub-£200k turnover and sub-1yr trading
-- Mock Companies House lookup (live filter on a seeded dataset)
+- 7-step funnel: amount (hero) → purpose → Companies House → director → DOB-day verification → turnover (with live qualify estimate) → contact (residency + address + email + +44 phone)
+- Score reveal screen with dynamic match reasons + indicative range
+- Mock Companies House lookup with director DOB fixtures (swap for live `/officers` API when keys land)
+- Mock Google Places address autocomplete (swap when key is added)
 - `/api/lead` is a mocked POST that logs the payload
-- Backup hero variants (Bank-Rejection Vindication, VAT/HMRC) inside `lib/copy.ts` for split-test swaps
 
 ## Compliance gates (non-negotiable)
 
@@ -55,7 +72,7 @@ Every claim on every page must pass `.croev/USP_Compliance.md` (kept in the work
 - **Never:** `pre-approved` (→ `pre-qualified`), `instant decision` (→ `as little as 1 hour`), `no personal guarantee` in any government-scheme context (→ `your home stays safe`), `safe` / `risk-free` describing any funding product, comparisons between GGS and the Bounceback Loan Scheme.
 - **Lender count:** locked to `100+ FCA-regulated lenders` (existing video ads say 250; resolve with Max before unlocking).
 - **Speed claims:** always `as little as 1 hour` (approval) / `as soon as 4 hours` (funding). Typical fundings sit at 24–48 hours.
-- **No sole traders.** Q5 trading-length gate + Q7 Companies House lookup filter them out; explicit sole-trader off-ramp destination pending from Max.
+- **No sole traders.** Companies-House gate + director-only flow filters them out.
 
 ## Open questions for the client (blocking final cut)
 

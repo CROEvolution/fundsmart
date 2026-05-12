@@ -9,9 +9,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Fundsmart · Get matched to one lender",
+  title: {
+    default: "Fundsmart · UK SME funding, matched to one lender",
+    template: "%s · Fundsmart",
+  },
   description:
-    "Bank said no to your £50k+? In 2 minutes, we find the 1 lender most likely to say yes. Soft search only. No cowboys.",
+    "FCA-regulated brokerage. 100+ lenders. One match. Soft credit search only.",
 };
 
 export default function RootLayout({
