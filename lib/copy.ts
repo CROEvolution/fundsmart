@@ -12,22 +12,22 @@ export const hero = {
 };
 
 export const q1 = {
-  label: "Has your bank already said no, or are you skipping them this time?",
+  label: "When do you need the money?",
   options: [
     {
-      value: "bank-no" as const,
-      label: "Bank said no",
-      micro: "You're not alone. 40% of UK SME loan applications get rejected. Their algorithm, not your business.",
+      value: "today" as const,
+      label: "Today, it's urgent",
+      micro: "We route fastest-fit lenders first. Approval can be as little as 1 hour.",
     },
     {
-      value: "skipping" as const,
-      label: "Skipping the bank",
-      micro: "Smart move. Bank lending takes weeks. Private finance moves in hours.",
+      value: "this-week" as const,
+      label: "This week",
+      micro: "Best fit for VAT, supplier, payroll, or contract-start pressure.",
     },
     {
-      value: "never-tried" as const,
-      label: "Haven't tried yet",
-      micro: "Most operators who come to us don't bother with the bank first. Saves the hard credit pull.",
+      value: "exploring" as const,
+      label: "Just exploring",
+      micro: "Check your range privately before you need the money.",
     },
   ],
 };

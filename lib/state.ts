@@ -22,6 +22,9 @@ export type Purpose =
   | "other";
 
 export type Residency = "own" | "rent" | "live-with-family";
+export type TradingLength = "under-1" | "1-3" | "3-5" | "5-plus";
+export type Urgency = "today" | "this-week" | "this-month" | "exploring";
+export type TurnoverBand = "under-200k" | "200-500k" | "500k-1m" | "1m-3m" | "3m-plus";
 
 export type Director = {
   name: string;
@@ -48,6 +51,9 @@ export type AddressSuggestion = {
 export type Answers = {
   amount: Amount | null;
   purpose: Purpose | null;
+  turnoverBand: TurnoverBand | null;
+  tradingLength: TradingLength | null;
+  urgency: Urgency | null;
   company: Company | null;
   director: Director | null;
   dobDay: number | null;
@@ -62,6 +68,9 @@ export type Answers = {
 export const emptyAnswers: Answers = {
   amount: null,
   purpose: null,
+  turnoverBand: null,
+  tradingLength: null,
+  urgency: null,
   company: null,
   director: null,
   dobDay: null,
@@ -170,6 +179,52 @@ export const RESIDENCY_LABEL: Record<Residency, string> = {
   rent: "I rent",
   "live-with-family": "I live with family",
 };
+
+export const TRADING_LENGTH_LABEL: Record<TradingLength, string> = {
+  "under-1": "Less than 1 year",
+  "1-3": "1 to 3 years",
+  "3-5": "3 to 5 years",
+  "5-plus": "5 years+",
+};
+
+export const URGENCY_LABEL: Record<Urgency, string> = {
+  today: "Today, it's urgent",
+  "this-week": "This week",
+  "this-month": "This month",
+  exploring: "Just exploring options",
+};
+
+export const TURNOVER_BAND_LABEL: Record<TurnoverBand, string> = {
+  "under-200k": "Under £200k",
+  "200-500k": "£200k to £500k",
+  "500k-1m": "£500k to £1m",
+  "1m-3m": "£1m to £3m",
+  "3m-plus": "£3m+",
+};
+
+export function turnoverBandAnnualValue(band: TurnoverBand): number {
+  switch (band) {
+    case "under-200k":
+      return 100_000;
+    case "200-500k":
+      return 350_000;
+    case "500k-1m":
+      return 750_000;
+    case "1m-3m":
+      return 1_800_000;
+    case "3m-plus":
+      return 3_500_000;
+  }
+}
+
+export function isEmailValid(email: string | null): boolean {
+  return !!email && /\S+@\S+\.\S+/.test(email);
+}
+
+export function isPhoneValid(phone: string | null): boolean {
+  const digits = (phone ?? "").replace(/\D/g, "");
+  return digits.length >= 9 && digits.length <= 11;
+}
 
 // ---- Mock Companies House + officer fixtures ----
 // Shape mirrors what api.company-information.service.gov.uk returns from

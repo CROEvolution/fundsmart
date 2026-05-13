@@ -229,29 +229,20 @@ Six angles. Each one is grounded in a primary source and tagged with awareness/s
 
 ### 4b. Recommended quiz mechanic (5–7 questions)
 
-The /landinggov funnel uses a 2-inline + 4-modal structure. Our quiz should *out-trust* it by adding a scored output and reordering to put pre-qualification signals *earlier*. Proposed 7 questions:
+The /landinggov funnel uses a 2-inline + 4-modal structure. Our quiz should *out-trust* it by adding a scored output and reordering to put pre-qualification signals *earlier*. Proposed questions:
 
-1. **Q1 (inline, replaces the amount-picker)**: "Did your bank already say no, or are you avoiding them this time?" — chips: **"Bank said no" / "Skipping the bank" / "Haven't tried yet"**. This is the identification question. It is *not* an amount; the amount comes after we've earned a click on identity.
-2. **Q2 (inline)**: "How much do you need?" — keep the £10k–£1m+ chip grid from the control. Familiar, fast.
-3. **Q3 (inline)**: "What's it for?" — Growth / Working Capital / VAT or HMRC / Equipment / Bridge a contract. **Add "VAT or HMRC" — control is missing this and it's a top-3 funding reason per the static ads.**
+1. **Q1 (inline)**: "How much funding do you need?" — keep the £10k–£1m+ chip grid from the control. Familiar, fast.
+2. **Q2 (inline)**: "What's it for?" — Growth / Working Capital / VAT or HMRC / Equipment / Bridge a contract. **Add "VAT or HMRC" — control is missing this and it's a top-3 funding reason per the static ads.**
+3. **Q3 (inline)**: "When do you need the money?" — Today / This week / This month / Just exploring options. Surfaces urgency for routing.
 4. **Q4 (modal opens)**: "What's your annual turnover?" — chip ranges: <£200k / £200k–£500k / £500k–£1m / £1m–£3m / £3m+. **Chip ranges instead of free-text** to disqualify <£200k early (the eligibility floor from brand-research line 14) without making them type.
 5. **Q5**: "How long have you been trading?" — <1yr / 1–3yr / 3–5yr / 5yr+. <1yr off-ramps politely (eligibility floor from brand-research line 15).
-6. **Q6**: "When do you need the money?" — Today / This week / This month / Just exploring options. Surfaces urgency for routing.
-7. **Q7**: Companies House search (their best magic trick — but pulled forward from step 1-of-modal to here, with reduced friction because the user has *already qualified themselves* on Q4/Q5 and feels invested).
+6. **Q6**: Companies House search (their best magic trick — but pulled forward from step 1-of-modal to here, with reduced friction because the user has *already qualified themselves* on Q4/Q5 and feels invested).
 
 Then a **Funding Fitness Score** screen (0–100, gamified) **before** the contact ask. This is the upgrade vs. /landinggov: rather than a binary "Good news — your business meets criteria" message, we show a real score, the three strongest reasons we got there, and the indicative funding range — *then* ask for email and phone to "send the full report and unlock your matched lender."
 
 ### 4c. Recommended hook for Q1
 
-/landinggov's inline Q1 is "How much do you need?" — utilitarian, but it does no qualifying or emotional work. A stronger Q1 is the **identification question** above: **"Did your bank already say no, or are you avoiding them this time?"**
-
-Why this beats the amount-picker:
-- It is the highest-signal segmentation question for routing (Sub A vs. Sub B vs. Sub C).
-- It does *qualifying-by-identification* — "if you tick this, you're in the right place" — which the control doesn't do until the modal.
-- It mirrors the strongest line in the winning testimonial ad ("Barclays said no even though my books were clean"). The user feels seen on click one.
-- An amount-picker is fine but generic; this one is *identifying*.
-
-The amount-picker stays as Q2 — we don't lose anything, we just earn a more emotional first click.
+Start with the amount picker. It is familiar, it keeps the form moving, and it avoids introducing subjective segmentation before the user has asked for lender matching.
 
 ### 4d. Where Fundsmart's funnel is weakest and how we exploit it
 

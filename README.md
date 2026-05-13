@@ -48,6 +48,9 @@ npm run dev          # http://localhost:3000 → /quz-001
 Visit individual routes directly:
 
 - `/quz-001` — Quiz LP (Anti-Spam / AI-Matched)
+- `/quz-001/v2` — Quiz LP form variant: Progressive Intent
+- `/quz-001/v3` — Quiz LP form variant: Eligibility First
+- `/quz-001/v4` — Quiz LP form variant: Fast Lead Capture
 - Future: `/sal-001`, `/adv-001`, etc.
 
 ## Deployment
@@ -64,6 +67,13 @@ One Vercel project for the repo. The root URL `/` redirects to the first live LP
 - Mock Companies House lookup with director DOB fixtures (swap for live `/officers` API when keys land)
 - Mock Google Places address autocomplete (swap when key is added)
 - `/api/lead` is a mocked POST that logs the payload
+
+#### Form split-test variants
+
+- **V1 Control:** `/quz-001` keeps the existing amount-first hero form, then opens the full qualification modal.
+- **V2 Progressive Intent:** `/quz-001/v2` uses a one-question-at-a-time hero flow: amount → funding reason → timing, then opens the modal.
+- **V3 Eligibility First:** `/quz-001/v3` asks amount, annual turnover band, and trading length before Companies House, with an early off-ramp for under-£200k or under-12-month businesses.
+- **V4 Fast Lead Capture:** `/quz-001/v4` captures amount, email, and phone in the hero, posts a `hero_capture` lead, then enriches the lead with qualification details.
 
 ## Compliance gates (non-negotiable)
 

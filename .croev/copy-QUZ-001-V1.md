@@ -41,21 +41,9 @@ Fundsmart's AI pulls your business from Companies House, looks at your real cash
 
 ---
 
-## Section 2. Inline pre-step questions (Q1 + Q2, before modal opens)
+## Section 2. Inline pre-step questions, before modal opens
 
-### Q1 (inline, identification question)
-
-**Label:** Has your bank already said no, or are you skipping them this time?
-
-**Chip options + hover micro-copy:**
-
-- **Bank said no:** "You're not alone. 40% of UK SME loan applications get rejected. Their algorithm, not your business."
-- **Skipping the bank:** "Smart move. Bank lending takes weeks. Private finance moves in hours."
-- **Haven't tried yet:** "Most operators who come to us don't bother with the bank first. Saves the hard credit pull."
-
-> Note: Identification question replaces the control's amount-picker as Q1. Highest-signal segmentation move per research-synthesis.md section 4c. Mirrors the strongest line in the winning testimonial ad ("Barclays said no even though my books were clean"). Builds investment before we ask anything quantitative.
-
-### Q2 (inline, amount picker)
+### Q1 (inline, amount picker)
 
 **Label:** How much funding do you need?
 
@@ -66,6 +54,14 @@ Fundsmart's AI pulls your business from Companies House, looks at your real cash
 **Below-chip link:** Other amount
 
 > Note: Keep the familiar grid from the control. Subhead carries the soft-search promise forward so it's visible on click two.
+
+### Q2 (inline, funding reason or timing)
+
+Use the active split-test variant:
+
+- **Progressive intent:** ask funding reason, then timing.
+- **Eligibility first:** ask turnover band, then trading length.
+- **Fast lead capture:** ask for email and phone after the amount.
 
 ---
 

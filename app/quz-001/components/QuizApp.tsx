@@ -10,8 +10,15 @@ import {
   type Director,
   type Purpose,
   type Residency,
+  type TradingLength,
+  type TurnoverBand,
+  type Urgency,
   emptyAnswers,
+  isEmailValid,
+  isPhoneValid,
+  turnoverBandAnnualValue,
 } from "@/lib/state";
+import { quizVariants, type ModalStepId, type QuizVariantId } from "@/lib/quizVariants";
 
 import { Icon } from "./ui";
 import TopBar from "./TopBar";
@@ -19,6 +26,7 @@ import Hero from "./Hero";
 import ModalShell from "./ModalShell";
 import {
   StepPurpose,
+  StepUrgency,
   StepCompany,
   StepDirector,
   StepDob,
@@ -32,14 +40,11 @@ import Footer from "./Footer";
 
 type Phase = "landing" | "quiz" | "score" | "success";
 
-// Step 1 = hero (amount). Steps 2..7 live in the modal.
-const TOTAL_STEPS = 7;
-const MODAL_START = 2;
-const MODAL_END = 7;
-
-export default function QuizApp() {
+export default function QuizApp({ variant = "control" }: { variant?: QuizVariantId }) {
+  const variantConfig = quizVariants[variant];
+  const totalSteps = variantConfig.heroStepCount + variantConfig.modalSteps.length;
   const [phase, setPhase] = useState<Phase>("landing");
-  const [step, setStep] = useState(MODAL_START);
+  const [modalIndex, setModalIndex] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [contact, setContact] = useState<ContactDetails | null>(null);
   const [answers, setAnswers] = useState<Answers>(emptyAnswers);
@@ -60,6 +65,19 @@ export default function QuizApp() {
 
   function setAmount(v: Amount) { setAnswers((a) => ({ ...a, amount: v })) }
   function setPurpose(v: Purpose) { setAnswers((a) => ({ ...a, purpose: v })) }
+  function setTradingLength(v: TradingLength) {
+    setAnswers((a) => ({ ...a, tradingLength: v }));
+  }
+  function setUrgency(v: Urgency) { setAnswers((a) => ({ ...a, urgency: v })) }
+  function setTurnoverBand(v: TurnoverBand) {
+    const annual = turnoverBandAnnualValue(v);
+    setAnswers((a) => ({
+      ...a,
+      turnoverBand: v,
+      annualTurnover: annual,
+      monthlyTurnover: Math.round(annual / 12),
+    }));
+  }
   function setCompany(v: Company | null) {
     setAnswers((a) => ({ ...a, company: v, director: null, dobDay: null }));
   }
@@ -67,7 +85,9 @@ export default function QuizApp() {
     setAnswers((a) => ({ ...a, director: v, dobDay: null }));
   }
   function setDobDay(v: number) { setAnswers((a) => ({ ...a, dobDay: v })) }
-  function setAnnual(n: number | null) { setAnswers((a) => ({ ...a, annualTurnover: n })) }
+  function setAnnual(n: number | null) {
+    setAnswers((a) => ({ ...a, annualTurnover: n, turnoverBand: null }));
+  }
   function setMonthly(n: number | null) { setAnswers((a) => ({ ...a, monthlyTurnover: n })) }
   function patchContact(p: {
     residency?: Residency;
@@ -84,12 +104,30 @@ export default function QuizApp() {
     }));
   }
 
+  function heroReady() {
+    if (variant === "control") return !!answers.amount;
+    if (variant === "v2") return !!answers.amount && !!answers.purpose && !!answers.urgency;
+    if (variant === "v3") {
+      return (
+        !!answers.amount &&
+        !!answers.turnoverBand &&
+        answers.turnoverBand !== "under-200k" &&
+        !!answers.tradingLength &&
+        answers.tradingLength !== "under-1"
+      );
+    }
+    return !!answers.amount && isEmailValid(answers.email) && isPhoneValid(answers.phone);
+  }
+
   function start() {
-    if (!answers.amount) {
+    if (!heroReady()) {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    setStep(MODAL_START);
+    if (variant === "v4") {
+      void postLead("hero_capture");
+    }
+    setModalIndex(0);
     setPhase("quiz");
   }
 
@@ -97,13 +135,26 @@ export default function QuizApp() {
     setPhase("landing");
   }
 
-  function nextFrom(s: number) {
-    if (s < MODAL_END) setStep(s + 1);
+  function nextFrom(i: number) {
+    if (i < variantConfig.modalSteps.length - 1) setModalIndex(i + 1);
     else submitLead();
   }
-  function backFrom(s: number) {
-    if (s > MODAL_START) setStep(s - 1);
+  function backFrom(i: number) {
+    if (i > 0) setModalIndex(i - 1);
     else setPhase("landing");
+  }
+
+  function postLead(stage: "hero_capture" | "complete") {
+    const c: ContactDetails = {
+      name: answers.director?.name ?? "Director",
+      email: answers.email ?? "",
+      phone: answers.phone ?? "",
+    };
+    return fetch("/api/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...c, variant, stage, answers }),
+    }).catch(() => {});
   }
 
   function submitLead() {
@@ -113,11 +164,7 @@ export default function QuizApp() {
       email: answers.email ?? "",
       phone: answers.phone ?? "",
     };
-    void fetch("/api/lead", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...c, answers }),
-    }).catch(() => {});
+    void postLead("complete");
     setTimeout(() => {
       setContact(c);
       setSubmitting(false);
@@ -125,13 +172,91 @@ export default function QuizApp() {
     }, 700);
   }
 
+  function renderModalStep(stepId: ModalStepId, i: number) {
+    switch (stepId) {
+      case "purpose":
+        return (
+          <StepPurpose
+            value={answers.purpose}
+            onChange={setPurpose}
+            onNext={() => nextFrom(i)}
+          />
+        );
+      case "urgency":
+        return (
+          <StepUrgency
+            value={answers.urgency}
+            onChange={setUrgency}
+            onNext={() => nextFrom(i)}
+          />
+        );
+      case "company":
+        return (
+          <StepCompany
+            value={answers.company}
+            onChange={setCompany}
+            onNext={() => nextFrom(i)}
+          />
+        );
+      case "director":
+        return (
+          <StepDirector
+            company={answers.company}
+            value={answers.director}
+            onChange={setDirector}
+            onNext={() => nextFrom(i)}
+          />
+        );
+      case "dob":
+        return (
+          <StepDob
+            director={answers.director}
+            value={answers.dobDay}
+            onChange={setDobDay}
+            onNext={() => nextFrom(i)}
+          />
+        );
+      case "turnover":
+        return (
+          <StepTurnover
+            annual={answers.annualTurnover}
+            monthly={answers.monthlyTurnover}
+            onChangeAnnual={setAnnual}
+            onChangeMonthly={setMonthly}
+            onNext={() => nextFrom(i)}
+          />
+        );
+      case "contact":
+        return (
+          <StepContact
+            residency={answers.residency}
+            address={answers.address}
+            email={answers.email}
+            phone={answers.phone}
+            onChange={patchContact}
+            onSubmit={() => nextFrom(i)}
+            submitting={submitting}
+          />
+        );
+    }
+  }
+
+  const modalStep = variantConfig.modalSteps[modalIndex];
+  const displayStep = variantConfig.heroStepCount + modalIndex + 1;
+
   return (
     <div className="page">
       <TopBar />
 
       <Hero
-        amount={answers.amount}
+        variant={variant}
+        answers={answers}
         setAmount={setAmount}
+        setPurpose={setPurpose}
+        setUrgency={setUrgency}
+        setTurnoverBand={setTurnoverBand}
+        setTradingLength={setTradingLength}
+        patchContact={patchContact}
         onContinue={start}
         cardRef={heroCardRef}
       />
@@ -163,7 +288,8 @@ export default function QuizApp() {
             1 hour during working hours.
           </p>
           <button className="btn primary xl" style={{ marginTop: 8 }} onClick={start}>
-            See my match <Icon name="ArrowRight" size="sm" />
+            {variant === "control" ? "See my match" : variantConfig.stickyCta}{" "}
+            <Icon name="ArrowRight" size="sm" />
           </button>
         </div>
       </section>
@@ -177,9 +303,9 @@ export default function QuizApp() {
       >
         <div className="stack" style={{ gap: 0 }}>
           <span style={{ fontWeight: 700, color: "var(--navy-900)", fontSize: 14 }}>
-            Get matched in 2 minutes
+            {variantConfig.stickyCta}
           </span>
-          <span className="tiny muted">Soft search only · no credit impact</span>
+          <span className="tiny muted">{variantConfig.stickySub}</span>
         </div>
         <button className="btn primary" onClick={start}>
           Start <Icon name="ArrowRight" size="sm" />
@@ -188,61 +314,12 @@ export default function QuizApp() {
 
       {phase === "quiz" && (
         <ModalShell
-          step={step}
-          total={TOTAL_STEPS}
-          onBack={() => backFrom(step)}
+          step={displayStep}
+          total={totalSteps}
+          onBack={() => backFrom(modalIndex)}
           onClose={close}
         >
-          {step === 2 && (
-            <StepPurpose
-              value={answers.purpose}
-              onChange={setPurpose}
-              onNext={() => nextFrom(2)}
-            />
-          )}
-          {step === 3 && (
-            <StepCompany
-              value={answers.company}
-              onChange={setCompany}
-              onNext={() => nextFrom(3)}
-            />
-          )}
-          {step === 4 && (
-            <StepDirector
-              company={answers.company}
-              value={answers.director}
-              onChange={setDirector}
-              onNext={() => nextFrom(4)}
-            />
-          )}
-          {step === 5 && (
-            <StepDob
-              director={answers.director}
-              value={answers.dobDay}
-              onChange={setDobDay}
-              onNext={() => nextFrom(5)}
-            />
-          )}
-          {step === 6 && (
-            <StepTurnover
-              annual={answers.annualTurnover}
-              monthly={answers.monthlyTurnover}
-              onChangeAnnual={setAnnual}
-              onChangeMonthly={setMonthly}
-              onNext={() => nextFrom(6)}
-            />
-          )}
-          {step === 7 && (
-            <StepContact
-              residency={answers.residency}
-              address={answers.address}
-              email={answers.email}
-              phone={answers.phone}
-              onChange={patchContact}
-              onSubmit={submitLead}
-              submitting={submitting}
-            />
-          )}
+          {renderModalStep(modalStep, modalIndex)}
         </ModalShell>
       )}
 

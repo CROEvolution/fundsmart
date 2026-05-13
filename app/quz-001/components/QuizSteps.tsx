@@ -9,9 +9,13 @@ import {
   type Director,
   type Purpose,
   type Residency,
+  type Urgency,
+  URGENCY_LABEL,
   fmtGBP,
   formatAddress,
   formatMonthYear,
+  isEmailValid,
+  isPhoneValid,
   qualifyMax,
   searchAddresses,
   searchCompanies,
@@ -49,10 +53,12 @@ export function ContinueBtn({
   const [mobile, setMobile] = useState(false);
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    setMounted(true);
     const mq = window.matchMedia("(max-width: 600px)");
     const update = () => setMobile(mq.matches);
-    update();
+    queueMicrotask(() => {
+      setMounted(true);
+      update();
+    });
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
   }, []);
@@ -126,6 +132,68 @@ export function StepPurpose({
   );
 }
 
+// ---------- Step: Urgency ----------
+
+const URGENCY_OPTS: { v: Urgency; ico: Parameters<typeof Icon>[0]["name"]; micro: string }[] = [
+  {
+    v: "today",
+    ico: "Zap",
+    micro: "We route fastest-fit lenders first. Approval can be as little as 1 hour.",
+  },
+  {
+    v: "this-week",
+    ico: "Clock",
+    micro: "Best fit for VAT, supplier, payroll, or contract-start pressure.",
+  },
+  {
+    v: "this-month",
+    ico: "Wallet",
+    micro: "Enough time to compare the most suitable lender path.",
+  },
+  {
+    v: "exploring",
+    ico: "ShieldCheck",
+    micro: "Check your range privately before you need the money.",
+  },
+];
+
+export function StepUrgency({
+  value,
+  onChange,
+  onNext,
+}: {
+  value: Urgency | null;
+  onChange: (v: Urgency) => void;
+  onNext: () => void;
+}) {
+  return (
+    <>
+      <StepHeader
+        label="When do you need the money?"
+        sub="Honest answer please. Urgency changes which lenders we approach first."
+      />
+      <div className="stack gap-2">
+        {URGENCY_OPTS.map((o) => (
+          <Chip
+            key={o.v}
+            active={value === o.v}
+            onClick={() => onChange(o.v)}
+            sublabel={o.micro}
+            leftIcon={
+              <span className="step-icon">
+                <Icon name={o.ico} size="sm" />
+              </span>
+            }
+          >
+            {URGENCY_LABEL[o.v]}
+          </Chip>
+        ))}
+      </div>
+      <ContinueBtn disabled={!value} onClick={onNext} />
+    </>
+  );
+}
+
 // ---------- Step: Companies House search ----------
 
 export function StepCompany({
@@ -143,12 +211,8 @@ export function StepCompany({
   const tRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!q || q.length < 2) {
-      setOpen(false);
-      return;
-    }
-    setLoading(true);
     if (tRef.current) clearTimeout(tRef.current);
+    if (!q || q.length < 2) return;
     tRef.current = setTimeout(() => {
       setLoading(false);
       setOpen(true);
@@ -178,7 +242,13 @@ export function StepCompany({
             placeholder="Start typing… e.g. Foreman & Sons"
             value={q}
             onChange={(e) => {
-              setQ(e.target.value);
+              const next = e.target.value;
+              setQ(next);
+              if (next.length >= 2) setLoading(true);
+              else {
+                setLoading(false);
+                setOpen(false);
+              }
               if (value) onChange(null);
             }}
             onFocus={() => q.length >= 2 && setOpen(true)}
@@ -508,12 +578,8 @@ export function StepContact({
   const aRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!addrQ || addrQ.length < 2) {
-      setAddrOpen(false);
-      return;
-    }
-    setAddrLoading(true);
     if (aRef.current) clearTimeout(aRef.current);
+    if (!addrQ || addrQ.length < 2) return;
     aRef.current = setTimeout(() => {
       setAddrLoading(false);
       setAddrOpen(true);
@@ -525,9 +591,8 @@ export function StepContact({
 
   const addrSuggestions = addrQ.length >= 2 ? searchAddresses(addrQ) : [];
 
-  const emailValid = !!email && /\S+@\S+\.\S+/.test(email);
-  const phoneDigits = (phone ?? "").replace(/\D/g, "");
-  const phoneValid = phoneDigits.length >= 9 && phoneDigits.length <= 11;
+  const emailValid = isEmailValid(email);
+  const phoneValid = isPhoneValid(phone);
   const allValid = !!residency && !!address && emailValid && phoneValid;
 
   return (
@@ -569,7 +634,13 @@ export function StepContact({
             placeholder="Start typing your address or postcode…"
             value={addrQ}
             onChange={(e) => {
-              setAddrQ(e.target.value);
+              const next = e.target.value;
+              setAddrQ(next);
+              if (next.length >= 2) setAddrLoading(true);
+              else {
+                setAddrLoading(false);
+                setAddrOpen(false);
+              }
               if (address) onChange({ address: null });
             }}
             onFocus={() => addrQ.length >= 2 && setAddrOpen(true)}
