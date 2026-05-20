@@ -217,7 +217,6 @@ function Article() {
         <CaseStudiesSection />
         <FaqSection />
         <CtaSection />
-        <AuthorBio />
       </div>
     </section>
   );
@@ -754,60 +753,6 @@ function CtaSection() {
           signed off, with typical fundings completing inside 24 to 48 hours.
         </p>
       </div>
-
-      <div className="adv-disclosure">
-        <strong>Compliance disclosure</strong>
-        Fundsmart AI is an FCA-regulated credit broker, not a lender. By
-        starting the eligibility check, you agree that Fundsmart may share your
-        information with a matched FCA-regulated lender and with credit
-        reference and fraud prevention agencies, who will run a soft credit
-        search and identity check. A soft search has no impact on your credit
-        score and is invisible to other lenders. Fundsmart does not pass your
-        data to third-party marketers, and does not sell it. The Growth
-        Guarantee Scheme is administered by the British Business Bank. Loans
-        made under the scheme are subject to lender underwriting and scheme
-        eligibility criteria. Loans are available to UK limited companies and
-        partnerships; sole traders are not eligible on the Fundsmart panel. See
-        our Privacy Policy and Terms for the full detail.
-      </div>
     </>
-  );
-}
-
-function AuthorBio() {
-  return (
-    <aside className="adv-author">
-      <div className="adv-author-mark" aria-hidden="true">
-        FS
-      </div>
-      <div>
-        <h3>About the Fundsmart Editorial Team</h3>
-        <p>
-          Fundsmart AI is an independent UK credit broker authorised and
-          regulated by the Financial Conduct Authority. The editorial team
-          writes about SME finance, government-backed lending, and the practical
-          mechanics of getting funded in the United Kingdom. Articles are
-          reviewed for accuracy by Fundsmart&apos;s compliance lead before
-          publication.
-        </p>
-        <ul className="adv-author-creds">
-          <li>
-            <Icon name="ShieldCheck" size="sm" /> FCA-regulated brokerage
-          </li>
-          <li>
-            <Icon name="Users" size="sm" /> 142,468+ UK businesses funded through the platform to date
-          </li>
-          <li>
-            <Icon name="Building2" size="sm" /> 100+ FCA-regulated lender partners
-          </li>
-          <li>
-            <Icon name="Lock" size="sm" /> Soft credit search only
-          </li>
-          <li>
-            <Icon name="CircleCheckBig" size="sm" /> 93% approval rate on matched applications
-          </li>
-        </ul>
-      </div>
-    </aside>
   );
 }
