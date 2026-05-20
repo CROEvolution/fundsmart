@@ -64,6 +64,19 @@ export default function QuizApp({ variant = "control" }: { variant?: QuizVariant
   }, []);
 
   function setAmount(v: Amount) { setAnswers((a) => ({ ...a, amount: v })) }
+
+  // Seed amount from `?amount=` on first mount (e.g. handed off from the
+  // /adv-001 sticky rail). Runs once; never overrides a user pick.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const seed = new URLSearchParams(window.location.search).get("amount");
+    if (!seed) return;
+    const valid: Amount[] = ["10k", "25k", "50k", "100k", "250k", "500k", "1m", "other"];
+    if ((valid as string[]).includes(seed)) {
+      setAnswers((a) => (a.amount ? a : { ...a, amount: seed as Amount }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   function setPurpose(v: Purpose) { setAnswers((a) => ({ ...a, purpose: v })) }
   function setTradingLength(v: TradingLength) {
     setAnswers((a) => ({ ...a, tradingLength: v }));

@@ -21,11 +21,11 @@ beats: /landinggov control funnel
 
 ### H1 (primary)
 
-**One matched lender. One soft search. No comparison-site cowboys.**
+**Bank said no to your SME loan? In 2 minutes, we find the 1 lender most likely to say yes.**
 
 ### Subhead
 
-Fundsmart's AI pulls your business from Companies House, looks at your real cashflow, and matches you to the single lender most likely to approve. Not twelve. Not your data sold on. One.
+**40% of UK SME loan applications get rejected.** One soft search, one matched lender, one decision, funded in as soon as 4 hours.
 
 ### Trust microstrip (renders directly under hero card)
 
